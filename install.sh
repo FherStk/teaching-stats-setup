@@ -53,8 +53,8 @@ apt_req libpq-dev python-dev
 apt_req python3-pip
 
 pip_req django 4.0.1
-# pip_req django-allauth==0.47.0
-# pip_req psycopg2-binary==2.9.3
+pip_req django-allauth==0.47.0
+pip_req psycopg2-binary==2.9.3
 
 echo ""
-echo "${GREEN}Done!${NC}"
+echo "${GREEN}Done!${NC}" 
