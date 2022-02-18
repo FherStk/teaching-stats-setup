@@ -41,20 +41,14 @@ pip_req()
 pwd_req()
 {
   echo ""
-  echo "Set the password for the 'teaching-stats' database user:"
-  read -s pass1
-
-  echo ""
-  echo "Please, repeat the password:"
-  read -s pass2
-
-  if [ pass1 -eq pss2 ];
-  then
-    pwd=pass1
-  else
-    echo "Password missmatch!"
-    pwd_req()
-  fi
+  while true; do
+    read -s -p "Set the password for the 'teaching-stats' database user:" pwd
+    echo
+    read -s -p "Set the password (again): " pwd2
+    echo
+    [ "$pwd" = "$pwd2" ] && break
+    echo "Password missmatch, please try again"
+  done  
 }
 
 echo ""
