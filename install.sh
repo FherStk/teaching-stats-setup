@@ -17,14 +17,23 @@ CYAN='\033[0;36m'
 LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
 
-
-requirement()
+apt-req()
 {
   if [ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok installed") -eq 0 ];
   then
     echo ""
     echo "${LCYAN}Installing requirements: ${CYAN}${1}${NC}"
     apt install -y ${1};    
+  fi
+}
+
+pip-req()
+{
+  if [ $(pip3 list 2>/dev/null | grep -F ${1}) -eq 0 ];
+  then
+    echo ""
+    echo "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
+    pip3 install ${1}==${2};    
   fi
 }
 
@@ -38,13 +47,15 @@ echo ""
 echo "${LCYAN}Updating repo list:${NC}"
 apt update
 
-requirement apache2
-requirement python3
-requirement libpq-dev python-dev
-requirement python3-pip
-requirement django==4.0.1
-requirement django-allauth==0.47.0
-requirement psycopg2-binary==2.9.3
+apt-req apache2
+apt-req python3
+apt-req libpq-dev python-dev
+apt-req python3-pip
+
+
+pip-req django 4.0.1
+# pip-req django-allauth==0.47.0
+# pip-req psycopg2-binary==2.9.3
 
 echo ""
 echo "${GREEN}Done!${NC}"
