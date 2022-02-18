@@ -10,7 +10,7 @@ requirement()
 {
   if [ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok installed") -eq 0 ];
   then
-    echo "${CYAN}Installing requirements: ${LCYAN}${1}${NC}"
+    echo "${LCYAN}Installing requirements: ${CYAN}${1}${NC}"
     apt-get install ${1};
   fi
 }
@@ -22,7 +22,7 @@ echo "${YELLOW}Copyright © 2022:${NC} Fernando Porrino Serrano"
 echo "${YELLOW}Under the AGPL license:${NC} https://github.com/FherStk/teaching-stats-setup/blob/main/LICENSE"
 
 echo ""
-echo "${CYAN}Updating repo list:${NC}"
+echo "${LCYAN}Updating repo list:${NC}"
 apt update
 
 echo ""
