@@ -59,11 +59,18 @@ pip_req psycopg2-binary 2.9.3
 
 echo ""
 echo "${LCYAN}Copying files:${NC}"
-cp -r teaching-stats /var/www/teaching-stats
+cp -r -v teaching-stats /var/www/teaching-stats
 
+if [ $(runuser -l postgres -c 'psql -lqt | cut -d \| -f 1 | grep -c teaching-stats') -eq 0 ];
+  then
+    echo ""
+    echo "${LCYAN}Creating database:"
+    runuser -l postgres -c 'createdb teaching-stats'
+fi
 
-
-
+#teaching-stats user must be also created and must be the owner of the teaching-stats BBDD
+#also the 3 schemas must be created (master, public, reports)
+#bbdd populating will do the rest
 
 echo ""
 echo "${GREEN}Done!${NC}" 
