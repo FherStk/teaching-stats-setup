@@ -31,6 +31,7 @@ pip_req()
 {
   if [! $(pip3 list 2>/dev/null | grep -F "${1}")];
   then
+  else
     echo ""
     echo "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
     pip3 install ${1}==${2};    
