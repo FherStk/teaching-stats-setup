@@ -1,0 +1,3 @@
+[submodule "teaching-stats"]
+	path = teaching-stats
+	url = https://github.com/Marcos-A/teaching-stats.git
