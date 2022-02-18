@@ -22,8 +22,9 @@ requirement()
 {
   if [ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok installed") -eq 0 ];
   then
+    echo ""
     echo "${LCYAN}Installing requirements: ${CYAN}${1}${NC}"
-    apt install -y ${1};
+    apt install -y ${1};    
   fi
 }
 
@@ -37,26 +38,13 @@ echo ""
 echo "${LCYAN}Updating repo list:${NC}"
 apt update
 
-echo ""
 requirement apache2
-
-echo ""
 requirement python3
-
-# echo ""
-# requirement libpq-dev python-dev
-
-# echo ""
-# requirement python3-pip
-
-# echo ""
-# requirement django==4.0.1
-
-# echo ""
-# requirement django-allauth==0.47.0
-
-#echo ""
-#requirement psycopg2-binary==2.9.3
+requirement libpq-dev python-dev
+requirement python3-pip
+requirement django==4.0.1
+requirement django-allauth==0.47.0
+requirement psycopg2-binary==2.9.3
 
 echo ""
-echo "${GREEN}Finish!${NC}"
+echo "${GREEN}Done!${NC}"
