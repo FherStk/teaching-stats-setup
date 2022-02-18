@@ -7,10 +7,10 @@ NC='\033[0m' # No Color
 
 requirement()
 {
-  if [ $(dpkg-query -W -f='${Status}' ${0} 2>/dev/null | grep -c "ok installed") -eq 0 ];
+  if [ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok installed") -eq 0 ];
   then
     echo "${CYAN}Installing requirements: ${1}${NC}"
-    apt-get install ${0};
+    apt-get install ${1};
   fi
 }
 
