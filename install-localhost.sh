@@ -78,18 +78,18 @@ cp -r -v teaching-stats /var/www/teaching-stats
 if [ $(runuser -l postgres -c 'psql -lqt | cut -d \| -f 1 | grep -c teaching-stats') -eq 0 ];
   then
     echo ""
-    echo "${LCYAN}Creating the 'teaching-stats' database:"
+    echo "${LCYAN}Creating the 'teaching-stats' database:{NC}"
     runuser -l postgres -c 'createdb -e teaching-stats'
 fi
 
 if [ $(runuser -l postgres -c 'psql -c "\du teaching-stats" | cut -d \| -f 1 | grep -c teaching-stats') -eq 0 ];
   then
     echo ""
-    echo "${LCYAN}Creating the 'teaching-stats' database user:"
+    echo "${LCYAN}Creating the 'teaching-stats' database user:{NC}"
     pwd_req() #stores in pwd var
 
-    runuser -l postgres -c 'psql -c "CREATE USER teaching-stats WITH PASSWORD '${pwd}'"'
-    runuser -l postgres -c 'psql -c "ALTER DATABASE teaching-stats SET OWNER TO teaching-stats"'
+    runuser -l postgres -c 'psql -c "CREATE USER 'teaching-stats' WITH PASSWORD '${pwd}'"'
+    runuser -l postgres -c 'psql -c "ALTER DATABASE 'teaching-stats' SET OWNER TO 'teaching-stats'"'
 fi
 
 
