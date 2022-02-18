@@ -38,7 +38,7 @@ pip_req()
 }
 
 echo ""
-echo "${YELLOW}Setup for Teaching Stats:${NC} Install (v1.0.0)"
+echo "${YELLOW}Setup for Teaching Stats:${NC} Install for localhost (v1.0.0)"
 echo "${YELLOW}Copyright © 2022:${NC} Marcos Alcocer Gil"
 echo "${YELLOW}Copyright © 2022:${NC} Fernando Porrino Serrano"
 echo "${YELLOW}Under the AGPL license:${NC} https://github.com/FherStk/teaching-stats-setup/blob/main/LICENSE"
@@ -51,10 +51,19 @@ apt_req apache2
 apt_req python3
 apt_req libpq-dev python-dev
 apt_req python3-pip
+apt_req postgresql
 
 pip_req django 4.0.1
 pip_req django-allauth 0.47.0
 pip_req psycopg2-binary 2.9.3
+
+echo ""
+echo "${LCYAN}Copying files:${NC}"
+cp -r teaching-stats /var/www/teaching-stats
+
+
+
+
 
 echo ""
 echo "${GREEN}Done!${NC}" 
