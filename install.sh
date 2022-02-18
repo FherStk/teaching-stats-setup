@@ -1,15 +1,16 @@
 #!/bin/sh
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 
 requirement()
 {
-  if [ $(dpkg-query -W -f='${Status}' $0 2>/dev/null | grep -c "ok installed") -eq 0 ];
+  if [ $(dpkg-query -W -f='${Status}' ${0} 2>/dev/null | grep -c "ok installed") -eq 0 ];
   then
-    echo "Installing requirements: $0"
-    apt-get install $0;
+    echo "${CYAN}Installing requirements: ${0}${NC}"
+    apt-get install ${0};
   fi
 }
 
@@ -20,7 +21,7 @@ echo "${YELLOW}Copyright © 2022:${NC} Fernando Porrino Serrano"
 echo "${YELLOW}Under the AGPL license:${NC} https://github.com/FherStk/teaching-stats-setup/blob/main/LICENSE"
 
 echo ""
-echo "Updating repo list"
+echo "${CYAN}Updating repo list:${NC}"
 apt update
 
 echo ""
