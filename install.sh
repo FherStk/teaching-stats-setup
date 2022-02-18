@@ -17,7 +17,7 @@ CYAN='\033[0;36m'
 LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
 
-apt-req()
+apt_req()
 {
   if [ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok installed") -eq 0 ];
   then
@@ -27,7 +27,7 @@ apt-req()
   fi
 }
 
-pip-req()
+pip_req()
 {
   if [ $(pip3 list 2>/dev/null | grep -F ${1}) -eq 0 ];
   then
@@ -47,15 +47,15 @@ echo ""
 echo "${LCYAN}Updating repo list:${NC}"
 apt update
 
-apt-req apache2
-apt-req python3
-apt-req libpq-dev python-dev
-apt-req python3-pip
+apt_req apache2
+apt_req python3
+apt_req libpq-dev python-dev
+apt_req python3-pip
 
 
-pip-req django 4.0.1
-# pip-req django-allauth==0.47.0
-# pip-req psycopg2-binary==2.9.3
+pip_req django 4.0.1
+# pip_req django-allauth==0.47.0
+# pip_req psycopg2-binary==2.9.3
 
 echo ""
 echo "${GREEN}Done!${NC}"
