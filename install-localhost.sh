@@ -89,7 +89,7 @@ if [ $(runuser -l postgres -c 'psql -c "\du teaching-stats" | cut -d \| -f 1 | g
     pwd_req() #stores in pwd var
 
     runuser -l postgres -c 'psql -e -c "CREATE USER teaching-stats WITH PASSWORD \"${pwd}\""'
-    runuser -l postgres -c 'psql -e -c "ALTER DATABASE teaching-stats OWNER TO teaching-stats"'
+    runuser -l postgres -c 'psql -e -c "ALTER DATABASE \"teaching-stats\" OWNER TO teaching-stats"'
 fi
 
 
