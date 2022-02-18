@@ -9,7 +9,7 @@ requirement()
 {
   if [ $(dpkg-query -W -f='${Status}' ${0} 2>/dev/null | grep -c "ok installed") -eq 0 ];
   then
-    echo "${CYAN}Installing requirements: ${0}${NC}"
+    echo "${CYAN}Installing requirements: ${1}${NC}"
     apt-get install ${0};
   fi
 }
