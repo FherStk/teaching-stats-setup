@@ -16,6 +16,7 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
+bbdd='teaching-stats'
 pwd=''
 
 apt_req()
@@ -42,7 +43,7 @@ pwd_req()
 {
   echo ""
   while true; do
-    read -s -p "Set the password for the 'teaching-stats' database user:" pwd
+    read -s -p "Set the password for the '${bbdd}' database user:" pwd
     echo
     read -s -p "Set the password (again): " pwd2
     echo
@@ -51,11 +52,44 @@ pwd_req()
   done  
 }
 
+bbdd_create()
+{
+  if [ $(runuser -l postgres -c 'psql -lqt | cut -d \| -f 1 | grep -c ${bbdd}') -eq 0 ];
+  then
+    echo ""
+    echo "${LCYAN}Creating the '${bbdd}' database:${NC}"
+    runuser -l postgres -c 'createdb -e ${bbdd}'
+  fi
+}
+
+bbdd_user(){
+  if [ $(runuser -l postgres -c 'psql -c "\du ${bbdd}" | cut -d \| -f 1 | grep -c ${bbdd}') -eq 0 ];
+  then
+    echo ""
+    echo "${LCYAN}Creating the '${bbdd}' database user:${NC}"
+    pwd_req() #stores in pwd var
+
+    runuser -l postgres -c 'psql -e -c "CREATE USER \"${bbdd}\" WITH PASSWORD '"'"'${pwd}'"'"';"'  #'"'"' means ' -> https://stackoverflow.com/a/1250279
+    runuser -l postgres -c 'psql -e -c "ALTER DATABASE \"${bbdd}\" OWNER TO \"${bbdd}\";"'
+  fi
+}
+
+bbdd_schema(){
+  if [ $(runuser -l postgres -c 'psql -d "${bbdd}" -e -c "SELECT schema_name FROM information_schema.schemata;" | cut -d \| -f 1 | grep -c ${1}') -eq 0 ];
+  then
+    echo ""
+    echo "${LCYAN}Creating the '${1}' database schema:${NC}"
+
+    runuser -l postgres -c 'psql -d "${bbdd}" -e -c "CREATE SCHEMA ${1};"'
+    runuser -l postgres -c 'psql -e -c "ALTER SCHEMA ${1} OWNER TO \"${bbdd}\";"'
+  fi
+}
+
 echo ""
 echo "${YELLOW}Setup for Teaching Stats:${NC} Install for localhost (v1.0.0)"
 echo "${YELLOW}Copyright © 2022:${NC} Marcos Alcocer Gil"
 echo "${YELLOW}Copyright © 2022:${NC} Fernando Porrino Serrano"
-echo "${YELLOW}Under the AGPL license:${NC} https://github.com/FherStk/teaching-stats-setup/blob/main/LICENSE"
+echo "${YELLOW}Under the AGPL license:${NC} https://github.com/FherStk/${bbdd}-setup/blob/main/LICENSE"
 
 echo ""
 echo "${LCYAN}Updating repo list:${NC}"
@@ -73,31 +107,14 @@ pip_req psycopg2-binary 2.9.3
 
 echo ""
 echo "${LCYAN}Copying files:${NC}"
-cp -r -v teaching-stats /var/www/teaching-stats
+cp -r -v ${bbdd} /var/www/${bbdd}
 
-if [ $(runuser -l postgres -c 'psql -lqt | cut -d \| -f 1 | grep -c teaching-stats') -eq 0 ];
-  then
-    echo ""
-    echo "${LCYAN}Creating the 'teaching-stats' database:${NC}"
-    runuser -l postgres -c 'createdb -e teaching-stats'
-fi
+bbdd_create
+bbdd_user
 
-if [ $(runuser -l postgres -c 'psql -c "\du teaching-stats" | cut -d \| -f 1 | grep -c teaching-stats') -eq 0 ];
-  then
-    echo ""
-    echo "${LCYAN}Creating the 'teaching-stats' database user:${NC}"
-    pwd_req() #stores in pwd var
-
-    runuser -l postgres -c 'psql -e -c "CREATE USER \"teaching-stats\" WITH PASSWORD '"'"'${pwd}'"'"';"'  #'"'"' means ' -> https://stackoverflow.com/a/1250279
-    runuser -l postgres -c 'psql -e -c "ALTER DATABASE \"teaching-stats\" OWNER TO \"teaching-stats\";"'
-fi
-
-
-
-
-#teaching-stats user must be also created and must be the owner of the teaching-stats BBDD
-#also the 3 schemas must be created (master, public, reports)
-#bbdd populating will do the rest
+bbdd_schema public
+bbdd_schema master
+bbdd_schema reports
 
 echo ""
 echo "${GREEN}Done!${NC}" 
