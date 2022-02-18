@@ -29,7 +29,7 @@ apt_req()
 
 pip_req()
 {
-  if [ $(pip3 list 2>/dev/null | grep -F ${1}) -eq 0 ];
+  if [ $(pip3 list 2>/dev/null | grep -F "${1}") -eq 0 ];
   then
     echo ""
     echo "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
@@ -51,7 +51,6 @@ apt_req apache2
 apt_req python3
 apt_req libpq-dev python-dev
 apt_req python3-pip
-
 
 pip_req django 4.0.1
 # pip_req django-allauth==0.47.0
