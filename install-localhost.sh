@@ -16,6 +16,7 @@ YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
 LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
+pwd=''
 
 apt_req()
 {
@@ -34,6 +35,25 @@ pip_req()
     echo ""
     echo "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
     pip3 install ${1}==${2};    
+  fi
+}
+
+pwd_req()
+{
+  echo ""
+  echo "Set the password for the 'teaching-stats' database user:"
+  read -s pass1
+
+  echo ""
+  echo "Please, repeat the password:"
+  read -s pass2
+
+  if [ pass1 -eq pss2 ];
+  then
+    pwd=pass1
+  else
+    echo "Password missmatch!"
+    pwd_req()
   fi
 }
 
@@ -64,9 +84,22 @@ cp -r -v teaching-stats /var/www/teaching-stats
 if [ $(runuser -l postgres -c 'psql -lqt | cut -d \| -f 1 | grep -c teaching-stats') -eq 0 ];
   then
     echo ""
-    echo "${LCYAN}Creating database:"
-    runuser -l postgres -c 'createdb teaching-stats'
+    echo "${LCYAN}Creating the 'teaching-stats' database:"
+    runuser -l postgres -c 'createdb -e teaching-stats'
 fi
+
+if [ $(runuser -l postgres -c 'psql -c "\du teaching-stats" | cut -d \| -f 1 | grep -c teaching-stats') -eq 0 ];
+  then
+    echo ""
+    echo "${LCYAN}Creating the 'teaching-stats' database user:"
+    pwd_req() #stores in pwd var
+
+    runuser -l postgres -c 'psql -c "CREATE USER teaching-stats WITH PASSWORD '${pwd}'"'
+    runuser -l postgres -c 'psql -c "ALTER DATABASE teaching-stats SET OWNER TO teaching-stats"'
+fi
+
+
+
 
 #teaching-stats user must be also created and must be the owner of the teaching-stats BBDD
 #also the 3 schemas must be created (master, public, reports)
