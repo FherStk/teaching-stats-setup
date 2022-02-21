@@ -54,7 +54,7 @@ pwd_req()
 
 bbdd_create()
 {
-  if [ $(runuser -l postgres -c 'psql -lqt | cut -d \| -f 1 | grep -c ${bbdd}') -eq 0 ];
+  if [ $(runuser -l postgres -c "psql -lqt | cut -d \| -f 1 | grep -c ${bbdd}") -eq 0 ];
   then
     echo ""
     echo "${LCYAN}Creating the '${bbdd}' database:${NC}"
@@ -63,7 +63,7 @@ bbdd_create()
 }
 
 bbdd_user(){
-  if [ $(runuser -l postgres -c 'psql -c "\du ${bbdd}" | cut -d \| -f 1 | grep -c ${bbdd}') -eq 0 ];
+  if [ $(runuser -l postgres -c "psql -c "\du ${bbdd}" | cut -d \| -f 1 | grep -c ${bbdd}") -eq 0 ];
   then
     echo ""
     echo "${LCYAN}Creating the '${bbdd}' database user:${NC}"
@@ -75,7 +75,7 @@ bbdd_user(){
 }
 
 bbdd_schema(){
-  if [ $(runuser -l postgres -c 'psql -d "${bbdd}" -e -c "SELECT schema_name FROM information_schema.schemata;" | cut -d \| -f 1 | grep -c ${1}') -eq 0 ];
+  if [ $(runuser -l postgres -c "psql -d \"${bbdd}\" -e -c \"SELECT schema_name FROM information_schema.schemata;\" | cut -d \| -f 1 | grep -c ${1}") -eq 0 ];
   then
     echo ""
     echo "${LCYAN}Creating the '${1}' database schema:${NC}"
