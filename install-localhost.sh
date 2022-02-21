@@ -63,7 +63,7 @@ bbdd_create()
 }
 
 bbdd_user(){
-  if [ $(runuser -l postgres -c "psql -c "\du ${bbdd}" | cut -d \| -f 1 | grep -c ${bbdd}") -eq 0 ];
+  if [ $(runuser -l postgres -c "psql -c "\\du ${bbdd}" | cut -d \| -f 1 | grep -c ${bbdd}") -eq 0 ];
   then
     echo ""
     echo "${LCYAN}Creating the '${bbdd}' database user:${NC}"
