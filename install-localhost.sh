@@ -58,7 +58,7 @@ bbdd_create()
   then
     echo ""
     echo "${LCYAN}Creating the '${bbdd}' database:${NC}"
-    runuser -l postgres -c 'createdb -e ${bbdd}'
+    runuser -l postgres -c "createdb -e ${bbdd}"
   fi
 }
 
