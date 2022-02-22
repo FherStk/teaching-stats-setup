@@ -123,7 +123,7 @@ trap 'abort' 0
 set -e
 
 echo ""
-echo -e "${YELLOW}Setup for Teaching Stats:${NC} Install for localhost (v1.0.0)"
+echo -e "${YELLOW}Setup for Teaching Stats:${NC} Install for localhost (v0.0.1)"
 echo -e "${YELLOW}Copyright © 2022:${NC} Marcos Alcocer Gil"
 echo -e "${YELLOW}Copyright © 2022:${NC} Fernando Porrino Serrano"
 echo -e "${YELLOW}Under the AGPL license:${NC} https://github.com/FherStk/${BBDD}-setup/blob/main/LICENSE"
