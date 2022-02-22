@@ -174,6 +174,7 @@ setup_django()
   echo ""    
   python3 manage.py createsuperuser
 
+  echo ${CURRENT}
   cd ${CURRENT}
 }
 
