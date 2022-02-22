@@ -22,7 +22,8 @@ PWD = ''
 abort()
 {
   #Source: https://stackoverflow.com/a/22224317    
-    echo "An error occurred. Exiting..." >&2
+    echo ""
+    echo "${RED}An error occurred. Exiting...${NC}" >&2
     exit 1
 }
 
@@ -117,7 +118,7 @@ pip_req psycopg2-binary 2.9.3
 
 echo ""
 echo "${LCYAN}Copying files:${NC}"
-cp -r -v ${BBDD} /var/www/${BBDD}
+cp -r -v "${BBDD}" "/var/www/${BBDD}"
 
 BBDD_create
 BBDD_user
