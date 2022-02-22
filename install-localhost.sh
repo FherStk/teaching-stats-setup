@@ -75,7 +75,7 @@ BBDD_user(){
   then
     echo ""
     echo -e "${LCYAN}Creating the '${BBDD}' database user:${NC}"
-    pwd_req()
+    pwd_req
 
     runuser -l postgres -c "psql -e -c 'CREATE USER \"${BBDD}\" WITH PASSWORD '"'"'${PWD}'"'"';'"  #'"'"' means ' -> https://stackoverflow.com/a/1250279
     runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${BBDD}\" OWNER TO \"${BBDD}\";'"
