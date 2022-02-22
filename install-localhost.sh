@@ -167,7 +167,7 @@ setup_django()
   python3 manage.py makemigrations
   
   echo ""  
-  python3 manage.py migrate
+  python3 manage.py migrate --noinput
   
   echo ""  
   python3 dbsetup.py
