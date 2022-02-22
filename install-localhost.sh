@@ -19,7 +19,7 @@ NC='\033[0m' # No Color
 BBDD='teaching-stats'
 DIR="/var/www/${BBDD}"
 VERSION="0.0.2"
-PWD=''
+PASS=''
 
 abort()
 {
@@ -57,12 +57,12 @@ pwd_req()
 {  
   while true; do    
     echo -e "Set the password for the ${CYAN}${BBDD}${NC} database user:"
-    read -s PWD
+    read -s PASS
 
-    read -sp "Set the password (again): " PWD2
+    read -sp "Set the password (again): " PASS2
     echo ""
 
-    [ "$PWD" = "$PWD2" ] && break
+    [ "$PASS" = "$PASS2" ] && break
     echo -e "${RED}Password missmatch, please try again.${NC}"
     echo ""
   done  
@@ -87,7 +87,7 @@ bbdd_user(){
     echo -e "${LCYAN}Creating the ${CYAN}${BBDD}${LCYAN} database user:${NC}"
     pwd_req
     
-    runuser -l postgres -c "psql -e -c 'CREATE USER \"${BBDD}\" WITH PASSWORD '\'${PWD}\'';'"
+    runuser -l postgres -c "psql -e -c 'CREATE USER \"${BBDD}\" WITH PASSWORD '\'${PASS}\'';'"
     runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${BBDD}\" OWNER TO \"${BBDD}\";'"
 
   else
@@ -134,15 +134,15 @@ setup_files()
     echo "Setting up database user..."
     sed -i "s/'YOUR-USER'/'${BBDD}'/g" ${FILE}
 
-    if [ ${PWD} = ""];
+    if [ ${PASS} = ""];
     then    
       #if the bbdd already exists, the password must be provided
       echo -e "Please, provide the password for the ${CYAN}${BBDD}${NC} database user:"
-      read -s PWD          
+      read -s PASS          
     fi
     
     echo "Setting up database password..."
-    sed -i "s/'YOUR-PASSWORD'/'${PWD}'/g" ${FILE}
+    sed -i "s/'YOUR-PASSWORD'/'${PASS}'/g" ${FILE}
 
     echo "Setting up database host..."
     sed -i "s/'YOUR-HOST'/'localhost'/g" ${FILE}
@@ -160,19 +160,25 @@ setup_django()
 {
   echo ""  
   echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django instance:${NC}"
-  python3 ${DIR}/manage.py makemigrations
+  
+  CURRENT=$(PWD)
+  
+  cd ${DIR}
+  python3 manage.py makemigrations
   
   echo ""  
-  python3 ${DIR}/manage.py migrate
+  python3 manage.py migrate
   
   echo ""  
-  python3 ${DIR}/dbsetup.py
+  python3 dbsetup.py
   
   echo ""  
-  python3 ${DIR}/manage.py collectstatic
+  python3 manage.py collectstatic
   
   echo ""    
-  python3 ${DIR}/manage.py createsuperuser
+  python3 manage.py createsuperuser
+
+  cd ${CURRENT}
 }
 
 trap 'abort' 0
@@ -190,9 +196,11 @@ apt update
 
 apt_req apache2
 apt_req python3
-apt_req libpq-dev python-dev
+apt_req libpq-dev 
+apt_req python-dev
 apt_req python3-pip
 apt_req postgresql
+apt_req postgresql-contrib
 
 pip_req django 4.0.1
 pip_req django-allauth 0.47.0
