@@ -161,7 +161,7 @@ setup_django()
   echo ""  
   echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django instance:${NC}"
   
-  CURRENT=$(PWD)
+  CURRENT=${PWD##*/}
   
   cd ${DIR}
   python3 manage.py makemigrations
