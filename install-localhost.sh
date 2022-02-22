@@ -23,7 +23,7 @@ abort()
 {
   #Source: https://stackoverflow.com/a/22224317    
   echo ""
-  echo "${RED}An error occurred. Exiting...${NC}" >&2
+  echo -e "${RED}An error occurred. Exiting...${NC}" >&2
   exit 1
 }
 
@@ -32,7 +32,7 @@ apt_req()
   if [ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok installed") -eq 0 ];
   then
     echo ""
-    echo "${LCYAN}Installing requirements: ${CYAN}${1}${NC}"
+    echo -e "${LCYAN}Installing requirements: ${CYAN}${1}${NC}"
     apt install -y ${1};    
   fi
 }
@@ -42,7 +42,7 @@ pip_req()
   if [ $(pip3 list 2>/dev/null | grep -io -c "${1}") -eq 0 ];
   then
     echo ""
-    echo "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
+    echo -e "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
     pip3 install ${1}==${2};    
   fi
 }
@@ -65,7 +65,7 @@ BBDD_create()
   if [ $(runuser -l postgres -c "psql -lqt | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
   then
     echo ""
-    echo "${LCYAN}Creating the '${BBDD}' database:${NC}"
+    echo -e "${LCYAN}Creating the '${BBDD}' database:${NC}"
     runuser -l postgres -c "createdb -e ${BBDD}"
   fi
 }
@@ -74,7 +74,7 @@ BBDD_user(){
   if [ $(runuser -l postgres -c "psql -c \"\\du ${BBDD}\" | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
   then
     echo ""
-    echo "${LCYAN}Creating the '${BBDD}' database user:${NC}"
+    echo -e "${LCYAN}Creating the '${BBDD}' database user:${NC}"
     echo ""
     while true; do
       read -sp "Set the password for the '${BBDD}' database user:" PWD
@@ -94,7 +94,7 @@ BBDD_schema(){
   if [ $(runuser -l postgres -c "psql -d \"${BBDD}\" -e -c \"SELECT schema_name FROM information_schema.schemata;\" | cut -d \| -f 1 | grep -c ${1}") -eq 0 ];
   then
     echo ""
-    echo "${LCYAN}Creating the '${1}' database schema:${NC}"
+    echo -e "${LCYAN}Creating the '${1}' database schema:${NC}"
 
     runuser -l postgres -c "psql -d \"${BBDD}\" -e -c \"CREATE SCHEMA ${1};\""
     runuser -l postgres -c "psql -e -c \"ALTER SCHEMA ${1} OWNER TO \"${BBDD}\";\""
@@ -105,13 +105,13 @@ trap 'abort' 0
 set -e
 
 echo ""
-echo "${YELLOW}Setup for Teaching Stats:${NC} Install for localhost (v1.0.0)"
-echo "${YELLOW}Copyright © 2022:${NC} Marcos Alcocer Gil"
-echo "${YELLOW}Copyright © 2022:${NC} Fernando Porrino Serrano"
-echo "${YELLOW}Under the AGPL license:${NC} https://github.com/FherStk/${BBDD}-setup/blob/main/LICENSE"
+echo -e "${YELLOW}Setup for Teaching Stats:${NC} Install for localhost (v1.0.0)"
+echo -e "${YELLOW}Copyright © 2022:${NC} Marcos Alcocer Gil"
+echo -e "${YELLOW}Copyright © 2022:${NC} Fernando Porrino Serrano"
+echo -e "${YELLOW}Under the AGPL license:${NC} https://github.com/FherStk/${BBDD}-setup/blob/main/LICENSE"
 
 echo ""
-echo "${LCYAN}Updating repo list:${NC}"
+echo -e "${LCYAN}Updating repo list:${NC}"
 apt update
 
 apt_req apache2
@@ -125,7 +125,7 @@ pip_req django-allauth 0.47.0
 pip_req psycopg2-binary 2.9.3
 
 echo ""
-echo "${LCYAN}Copying files:${NC}"
+echo -e "${LCYAN}Copying files:${NC}"
 cp -r -v "${BBDD}" "/var/www/${BBDD}"
 
 BBDD_create
@@ -137,4 +137,4 @@ BBDD_schema reports
 
 trap : 0
 echo ""
-echo "${GREEN}Done!${NC}" 
+echo -e "${GREEN}Done!${NC}" 
