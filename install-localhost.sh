@@ -48,7 +48,7 @@ pip_req()
     echo -e "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
     pip3 install ${1}==${2};    
   else 
-    echo -e "${LCYAN}Requirement ${CYAN}${1}${LCYAN} already satisfied, skipping...${NC}"
+    echo -e "${CYAN}Requirement ${LCYAN}${1}${CYAN} already satisfied, skipping...${NC}"
   fi
 }
 
@@ -59,7 +59,7 @@ copy()
     echo -e "${LCYAN}Copying files into ${CYAN}${BBDD}${LCYAN}:${NC}"
     cp -r -v "${BBDD}" "/var/www/${BBDD}"
   else
-    echo -e "${LCYAN}Files already copied within ${CYAN}${BBDD}${LCYAN}, skipping...${NC}"
+    echo -e "${CYAN}Files already copied within ${LCYAN}${BBDD}${CYAN}, skipping...${NC}"
   fi
 }
 
@@ -87,7 +87,7 @@ BBDD_create()
     echo -e "${LCYAN}Creating the ${CYAN}${BBDD}${LCYAN} database:${NC}"
     runuser -l postgres -c "createdb -e ${BBDD}"
   else
-    echo -e "${LCYAN}The database ${CYAN}${BBDD}${LCYAN} already exists, skipping...${NC}"
+    echo -e "${CYAN}The database ${LCYAN}${BBDD}${CYAN} already exists, skipping...${NC}"
   fi
 }
 
@@ -102,7 +102,7 @@ BBDD_user(){
     runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${BBDD}\" OWNER TO \"${BBDD}\";'"
 
   else
-    echo -e "${LCYAN}The database user ${CYAN}${BBDD}${LCYAN} already exists, skipping...${NC}"
+    echo -e "${CYAN}The database user ${LCYAN}${BBDD}${CYAN} already exists, skipping...${NC}"
   fi
 }
 
@@ -116,7 +116,7 @@ BBDD_schema(){
     runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'ALTER SCHEMA \"${1}\" OWNER TO \"${BBDD}\";'"
 
   else
-    echo -e "${LCYAN}The database schema ${CYAN}${1}${LCYAN} already exists, skipping...${NC}"
+    echo -e "${CYAN}The database schema ${LCYAN}${1}${CYAN} already exists, skipping...${NC}"
   fi
 }
 
