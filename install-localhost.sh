@@ -50,7 +50,7 @@ pip_req()
 
 copy()
 {
-  if [ -d "$DIR" ]; then
+  if ! [ -d "$DIR" ]; then
     echo ""
     echo -e "${LCYAN}Copying files:${NC}"
     cp -r -v "${BBDD}" "/var/www/${BBDD}"
