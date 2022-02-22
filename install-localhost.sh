@@ -197,7 +197,7 @@ apt update
 apt_req apache2
 apt_req python3
 apt_req libpq-dev 
-apt_req python-dev
+apt_req python-dev-is-python2
 apt_req python3-pip
 apt_req postgresql
 apt_req postgresql-contrib
