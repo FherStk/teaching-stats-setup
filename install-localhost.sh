@@ -77,9 +77,9 @@ BBDD_user(){
     echo "${LCYAN}Creating the '${BBDD}' database user:${NC}"
     echo ""
     while true; do
-      read -s -p "Set the password for the '${BBDD}' database user:" PWD
+      read -sp "Set the password for the '${BBDD}' database user:" PWD
       echo
-      read -s -p "Set the password (again): " PWD2
+      read -sp "Set the password (again): " PWD2
       echo
       [ "$PWD" = "$PWD2" ] && break
       echo "Password missmatch, please try again"
