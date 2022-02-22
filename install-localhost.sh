@@ -36,7 +36,7 @@ apt_req()
     echo -e "${LCYAN}Installing requirements: ${CYAN}${1}${NC}"
     apt install -y ${1};    
   else 
-    echo -e "${LCYAN}Requirement ${CYAN}${1}${LCYAN} already installed, skipping...${NC}"
+    echo -e "${LCYAN}Requirement ${CYAN}${1}${LCYAN} already satisfied, skipping...${NC}"
   fi
 }
 
@@ -48,7 +48,7 @@ pip_req()
     echo -e "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
     pip3 install ${1}==${2};    
   else 
-    echo -e "${LCYAN}Requirement ${CYAN}${1}${LCYAN} already installed, skipping...${NC}"
+    echo -e "${LCYAN}Requirement ${CYAN}${1}${LCYAN} already satisfied, skipping...${NC}"
   fi
 }
 
