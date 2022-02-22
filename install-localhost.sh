@@ -164,19 +164,17 @@ setup_django()
   CURRENT=${PWD##*/}
   
   cd ${DIR}
-  python3 manage.py makemigrations
+  python3 manage.py makemigrations --noinput
   
   echo ""  
-  python3 manage.py migrate --noinput
-  
-  echo ""  
+  python3 manage.py migrate --noinput  
   python3 dbsetup.py
   
   echo ""  
-  python3 manage.py collectstatic
+  python3 manage.py collectstatic --noinput
   
   echo ""    
-  python3 manage.py createsuperuser
+  python3 manage.py createsuperuser --noinput
 
   cd ${CURRENT}
 }
