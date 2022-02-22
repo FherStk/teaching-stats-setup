@@ -36,7 +36,7 @@ apt_req()
     echo -e "${LCYAN}Installing requirements: ${CYAN}${1}${NC}"
     apt install -y ${1};    
   else 
-    echo -e "${LCYAN}Requirement ${CYAN}${1}${LCYAN} already satisfied, skipping...${NC}"
+    echo -e "${CYAN}Requirement ${LYAN}${1}${CYAN} already satisfied, skipping...${NC}"
   fi
 }
 
@@ -67,12 +67,12 @@ pwd_req()
 {  
   while true; do
     echo ""
-    echo -e "Set the password for the ${CYAN}${BBDD}${LCYAN} database user:"
+    echo -e "Set the password for the ${CYAN}${BBDD}${NC} database user:"
     read -s PWD
 
     echo ""
     read -sp "Set the password (again): " PWD2
-    
+
     echo ""
     [ "$PWD" = "$PWD2" ] && break
     echo "${RED}Password missmatch, please try again.${NC}"
