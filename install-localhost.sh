@@ -173,7 +173,10 @@ setup_django()
   
   echo ""    
   echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django superuser:${NC}"
-  python3 manage.py createsuperuser --noinput --username ${BBDD} --email ""
+  DJANGO_SUPERUSER_USERNAME=${BBDD} \
+  DJANGO_SUPERUSER_PASSWORD=${PASS} \
+  DJANGO_SUPERUSER_EMAIL= \
+  python3 manage.py createsuperuser --noinput
 
   cd $HOME/${CURRENT}
 }
@@ -206,9 +209,9 @@ pip_req psycopg2-binary 2.9.3
 bbdd_create
 bbdd_user
 
-#bbdd_schema public
-#bbdd_schema master
-#bbdd_schema reports
+bbdd_schema public
+bbdd_schema master
+bbdd_schema reports
 
 copy_files
 setup_files
