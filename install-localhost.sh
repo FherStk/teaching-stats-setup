@@ -128,10 +128,26 @@ setup_files()
   echo ""
   if ! [ -d "$MARK" ]; then    
     echo -e "${LCYAN}Setting up the django file ${CYAN}${FILE}${LCYAN}:${NC}"
+    echo "Setting up database name..."
     sed -i "s/'YOUR-DATABASE'/'${BBDD}'/g" ${FILE}
+
+    echo "Setting up database user..."
     sed -i "s/'YOUR-USER'/'${BBDD}'/g" ${FILE}
+
+    if [ ${PWD} = ""];
+    then    
+      #if the bbdd already exists, the password must be provided
+      echo -e "Please, provide the password for the ${CYAN}${BBDD}${LCYAN} database user:${NC}"
+      read -s PWD          
+    fi
+    
+    echo "Setting up database password..."
     sed -i "s/'YOUR-PASSWORD'/'${PWD}'/g" ${FILE}
+
+    echo "Setting up database host..."
     sed -i "s/'YOUR-HOST'/'localhost'/g" ${FILE}
+
+    echo "Setting up database port..."
     sed -i "s/'YOUR-PORT'/'5432'/g" ${FILE}
 
     touch $MARK
