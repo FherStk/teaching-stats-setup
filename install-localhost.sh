@@ -89,7 +89,7 @@ BBDD_schema(){
     echo -e "${LCYAN}Creating the '${1}' database schema:${NC}"
 
     runuser -l postgres -c "psql -d \"${BBDD}\" -e -c \"CREATE SCHEMA ${1};\""
-    runuser -l postgres -c "psql -e -c 'ALTER SCHEMA \"${1}\" OWNER TO \"${BBDD}\";'"
+    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'ALTER SCHEMA \"${1}\" OWNER TO \"${BBDD}\";'"
   fi
 }
 
