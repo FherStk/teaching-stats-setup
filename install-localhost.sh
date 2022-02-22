@@ -149,6 +149,9 @@ setup_files()
     echo "Setting up database port..."
     sed -i "s/'YOUR-PORT'/'5432'/g" ${FILE}
 
+    #SECRET
+    #python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())
+
     touch $MARK
   else
     echo -e "${CYAN}Django file ${LCYAN}${FILE}${CYAN} setup already done, skipping...${NC}"
