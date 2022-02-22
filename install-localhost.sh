@@ -173,7 +173,7 @@ setup_django()
   
   echo ""    
   echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django superuser:${NC}"
-  python3 manage.py createsuperuser --noinput --username ${BBDD}
+  python3 manage.py createsuperuser --noinput --username ${BBDD} --email ""
 
   cd $HOME/${CURRENT}
 }
