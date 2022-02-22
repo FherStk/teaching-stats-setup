@@ -69,12 +69,11 @@ pwd_req()
     echo -e "Set the password for the ${CYAN}${BBDD}${NC} database user:"
     read -s PWD
 
-    echo ""
     read -sp "Set the password (again): " PWD2
-
     echo ""
+    
     [ "$PWD" = "$PWD2" ] && break
-    echo "${RED}Password missmatch, please try again.${NC}"
+    echo -e "${RED}Password missmatch, please try again.${NC}"
     echo ""
   done  
 }
