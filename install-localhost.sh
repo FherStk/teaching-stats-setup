@@ -17,7 +17,8 @@ CYAN='\033[0;36m'
 LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
 BBDD='teaching-stats'
-DIR="/var/www/${BBDD}/"
+DIR="/var/www/${BBDD}"
+VERSION="0.0.2"
 PWD=''
 
 abort()
@@ -52,17 +53,6 @@ pip_req()
   fi
 }
 
-copy()
-{
-  echo ""
-  if ! [ -d "$DIR" ]; then    
-    echo -e "${LCYAN}Copying files into ${CYAN}${BBDD}${LCYAN}:${NC}"
-    cp -r -v "${BBDD}" "/var/www/${BBDD}"
-  else
-    echo -e "${CYAN}Files already copied within ${LCYAN}${BBDD}${CYAN}, skipping...${NC}"
-  fi
-}
-
 pwd_req()
 {  
   while true; do    
@@ -78,7 +68,7 @@ pwd_req()
   done  
 }
 
-BBDD_create()
+bbdd_create()
 {
   echo ""
   if [ $(runuser -l postgres -c "psql -lqt | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
@@ -90,7 +80,7 @@ BBDD_create()
   fi
 }
 
-BBDD_user(){
+bbdd_user(){
   echo ""
   if [ $(runuser -l postgres -c "psql -c \"\\du ${BBDD}\" | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
   then    
@@ -105,7 +95,7 @@ BBDD_user(){
   fi
 }
 
-BBDD_schema(){
+bbdd_schema(){
   echo ""
   if [ $(runuser -l postgres -c "psql -d \"${BBDD}\" -e -c \"SELECT schema_name FROM information_schema.schemata;\" | cut -d \| -f 1 | grep -c ${1}") -eq 0 ];
   then    
@@ -119,11 +109,53 @@ BBDD_schema(){
   fi
 }
 
+copy_files()
+{
+  echo ""
+  if ! [ -d "$DIR" ]; then    
+    echo -e "${LCYAN}Copying files into ${CYAN}${BBDD}${LCYAN}:${NC}"
+    cp -r -v "${BBDD}" "/var/www/${BBDD}"
+  else
+    echo -e "${CYAN}Files already copied within ${LCYAN}${BBDD}${CYAN}, skipping...${NC}"
+  fi
+}
+
+setup_files()
+{
+  MARK="$DIR/home/status.done"
+  FILE="$DIR/home/settings.py"
+
+  echo ""
+  if ! [ -d "$MARK" ]; then    
+    echo -e "${LCYAN}Setting up the django file ${CYAN}${FILE}${LCYAN}:${NC}"
+    sed -i "s/'YOUR-DATABASE'/'${BBDD}'/g" ${FILE}
+    sed -i "s/'YOUR-USER'/'${BBDD}'/g" ${FILE}
+    sed -i "s/'YOUR-PASSWORD'/'${PWD}'/g" ${FILE}
+    sed -i "s/'YOUR-HOST'/'localhost'/g" ${FILE}
+    sed -i "s/'YOUR-PORT'/'5432'/g" ${FILE}
+
+    touch $MARK
+  else
+    echo -e "${CYAN}Django file ${LCYAN}${FILE}${CYAN} setup already done, skipping...${NC}"
+  fi
+}
+
+setup_django()
+{
+  echo ""  
+  echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django instance:${NC}"
+  python ${DIR}/manage.py makemigrations
+  python ${DIR}/manage.py migrate
+  python ${DIR}/dbsetup.py
+  python ${DIR}/manage.py collectstatic
+  python ${DIR}/manage.py createsuperuser
+}
+
 trap 'abort' 0
 set -e
 
 echo ""
-echo -e "${YELLOW}Setup for Teaching Stats:${NC} Install for localhost (v0.0.1)"
+echo -e "${YELLOW}Setup for Teaching Stats:${NC} Install for localhost (v${VERSION})"
 echo -e "${YELLOW}Copyright © 2022:${NC} Marcos Alcocer Gil"
 echo -e "${YELLOW}Copyright © 2022:${NC} Fernando Porrino Serrano"
 echo -e "${YELLOW}Under the AGPL license:${NC} https://github.com/FherStk/${BBDD}-setup/blob/main/LICENSE"
@@ -142,14 +174,16 @@ pip_req django 4.0.1
 pip_req django-allauth 0.47.0
 pip_req psycopg2-binary 2.9.3
 
-copy
+bbdd_create
+bbdd_user
 
-BBDD_create
-BBDD_user
+bbdd_schema public
+bbdd_schema master
+bbdd_schema reports
 
-BBDD_schema public
-BBDD_schema master
-BBDD_schema reports
+copy_files
+setup_files
+setup_django
 
 trap : 0
 echo ""
