@@ -172,7 +172,7 @@ setup_django()
   python3 manage.py collectstatic --noinput
   
   echo ""    
-  python3 manage.py createsuperuser --noinput
+  python3 manage.py createsuperuser --noinput --username ${BBDD}
 
   cd ${CURRENT}
 }
