@@ -10,14 +10,21 @@
 # Cyan         0;36     Light Cyan    1;36
 # Light Gray   0;37     White         1;37
 
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
-LCYAN='\033[1;36m'
-NC='\033[0m' # No Color
-bbdd='teaching-stats'
-pwd=''
+RED = '\033[0;31m'
+GREEN = '\033[0;32m'
+YELLOW = '\033[1;33m'
+CYAN = '\033[0;36m'
+LCYAN = '\033[1;36m'
+NC = '\033[0m' # No Color
+BBDD = 'teaching-stats'
+PWD = ''
+
+abort()
+{
+  #Source: https://stackoverflow.com/a/22224317    
+    echo "An error occurred. Exiting..." >&2
+    exit 1
+}
 
 apt_req()
 {
@@ -39,57 +46,60 @@ pip_req()
   fi
 }
 
-pwd_req()
+PWD_req()
 {
   echo ""
   while true; do
-    read -s -p "Set the password for the '${bbdd}' database user:" pwd
+    read -s -p "Set the password for the '${BBDD}' database user:" PWD
     echo
-    read -s -p "Set the password (again): " pwd2
+    read -s -p "Set the password (again): " PWD2
     echo
-    [ "$pwd" = "$pwd2" ] && break
+    [ "$PWD" = "$PWD2" ] && break
     echo "Password missmatch, please try again"
   done  
 }
 
-bbdd_create()
+BBDD_create()
 {
-  if [ $(runuser -l postgres -c "psql -lqt | cut -d \| -f 1 | grep -c ${bbdd}") -eq 0 ];
+  if [ $(runuser -l postgres -c "psql -lqt | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
   then
     echo ""
-    echo "${LCYAN}Creating the '${bbdd}' database:${NC}"
-    runuser -l postgres -c "createdb -e ${bbdd}"
+    echo "${LCYAN}Creating the '${BBDD}' database:${NC}"
+    runuser -l postgres -c "createdb -e ${BBDD}"
   fi
 }
 
-bbdd_user(){
-  if [ $(runuser -l postgres -c "psql -c \"\\du ${bbdd}\" | cut -d \| -f 1 | grep -c ${bbdd}") -eq 0 ];
+BBDD_user(){
+  if [ $(runuser -l postgres -c "psql -c \"\\du ${BBDD}\" | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
   then
     echo ""
-    echo "${LCYAN}Creating the '${bbdd}' database user:${NC}"
-    pwd_req() #stores in pwd var
+    echo "${LCYAN}Creating the '${BBDD}' database user:${NC}"
+    PWD_req() #stores in PWD var
 
-    runuser -l postgres -c 'psql -e -c "CREATE USER \"${bbdd}\" WITH PASSWORD '"'"'${pwd}'"'"';"'  #'"'"' means ' -> https://stackoverflow.com/a/1250279
-    runuser -l postgres -c 'psql -e -c "ALTER DATABASE \"${bbdd}\" OWNER TO \"${bbdd}\";"'
+    runuser -l postgres -c "psql -e -c \"CREATE USER \"${BBDD}\" WITH PASSWORD '"'"'${PWD}'"'"';\""  #'"'"' means ' -> https://stackoverflow.com/a/1250279
+    runuser -l postgres -c "psql -e -c \"ALTER DATABASE \"${BBDD}\" OWNER TO \"${BBDD}\";\""
   fi
 }
 
-bbdd_schema(){
-  if [ $(runuser -l postgres -c "psql -d \"${bbdd}\" -e -c \"SELECT schema_name FROM information_schema.schemata;\" | cut -d \| -f 1 | grep -c ${1}") -eq 0 ];
+BBDD_schema(){
+  if [ $(runuser -l postgres -c "psql -d \"${BBDD}\" -e -c \"SELECT schema_name FROM information_schema.schemata;\" | cut -d \| -f 1 | grep -c ${1}") -eq 0 ];
   then
     echo ""
     echo "${LCYAN}Creating the '${1}' database schema:${NC}"
 
-    runuser -l postgres -c 'psql -d "${bbdd}" -e -c "CREATE SCHEMA ${1};"'
-    runuser -l postgres -c 'psql -e -c "ALTER SCHEMA ${1} OWNER TO \"${bbdd}\";"'
+    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c \"CREATE SCHEMA ${1};\""
+    runuser -l postgres -c "psql -e -c \"ALTER SCHEMA ${1} OWNER TO \"${BBDD}\";\""
   fi
 }
+
+trap 'abort' 0
+set -e
 
 echo ""
 echo "${YELLOW}Setup for Teaching Stats:${NC} Install for localhost (v1.0.0)"
 echo "${YELLOW}Copyright © 2022:${NC} Marcos Alcocer Gil"
 echo "${YELLOW}Copyright © 2022:${NC} Fernando Porrino Serrano"
-echo "${YELLOW}Under the AGPL license:${NC} https://github.com/FherStk/${bbdd}-setup/blob/main/LICENSE"
+echo "${YELLOW}Under the AGPL license:${NC} https://github.com/FherStk/${BBDD}-setup/blob/main/LICENSE"
 
 echo ""
 echo "${LCYAN}Updating repo list:${NC}"
@@ -107,14 +117,15 @@ pip_req psycopg2-binary 2.9.3
 
 echo ""
 echo "${LCYAN}Copying files:${NC}"
-cp -r -v ${bbdd} /var/www/${bbdd}
+cp -r -v ${BBDD} /var/www/${BBDD}
 
-bbdd_create
-bbdd_user
+BBDD_create
+BBDD_user
 
-bbdd_schema public
-bbdd_schema master
-bbdd_schema reports
+BBDD_schema public
+BBDD_schema master
+BBDD_schema reports
 
+trap : 0
 echo ""
 echo "${GREEN}Done!${NC}" 
