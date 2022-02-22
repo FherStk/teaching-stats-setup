@@ -35,6 +35,8 @@ apt_req()
     echo ""
     echo -e "${LCYAN}Installing requirements: ${CYAN}${1}${NC}"
     apt install -y ${1};    
+  else 
+    echo -e "${LCYAN}Requirement ${CYAN}${1}${LCYAN} already installed.${NC}"
   fi
 }
 
