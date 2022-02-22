@@ -172,10 +172,10 @@ setup_django()
   python3 manage.py collectstatic --noinput
   
   echo ""    
-  python3 manage.py createsuperuser
+  echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django superuser:${NC}"
+  python3 manage.py createsuperuser --noinput --username ${BBDD}
 
-  echo ${CURRENT}
-  cd ${CURRENT}
+  cd $HOME/${CURRENT}
 }
 
 trap 'abort' 0
