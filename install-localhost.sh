@@ -177,11 +177,16 @@ setup_django()
   then    
     #if the bbdd already exists, the password must be provided
     echo -e "Please, provide the password for the ${CYAN}${BBDD}${NC} django superuser:"
-    read -s PASS          
+    read -s PASS
+    echo ""          
   fi
   
+  echo -e "Please, provide the email for the ${CYAN}${BBDD}${NC} django superuser:"
+  read -s EMAIL          
+  echo ""
+
   DJANGO_SUPERUSER_PASSWORD=${PASS} \
-  python3 manage.py createsuperuser --noinput --username ${BBDD} --email somemail@somedomain.com
+  python3 manage.py createsuperuser --noinput --username ${BBDD} --email ${EMAIL}
 
   cd $HOME/${CURRENT}
 }
