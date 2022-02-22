@@ -10,21 +10,21 @@
 # Cyan         0;36     Light Cyan    1;36
 # Light Gray   0;37     White         1;37
 
-RED = '\033[0;31m'
-GREEN = '\033[0;32m'
-YELLOW = '\033[1;33m'
-CYAN = '\033[0;36m'
-LCYAN = '\033[1;36m'
-NC = '\033[0m' # No Color
-BBDD = 'teaching-stats'
-PWD = ''
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+CYAN='\033[0;36m'
+LCYAN='\033[1;36m'
+NC='\033[0m' # No Color
+BBDD='teaching-stats'
+PWD=''
 
 abort()
 {
   #Source: https://stackoverflow.com/a/22224317    
-    echo ""
-    echo "${RED}An error occurred. Exiting...${NC}" >&2
-    exit 1
+  echo ""
+  echo "${RED}An error occurred. Exiting...${NC}" >&2
+  exit 1
 }
 
 apt_req()
