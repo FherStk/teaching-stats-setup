@@ -56,7 +56,7 @@ pip_req()
 pwd_req()
 {  
   while true; do    
-    echo -e "Set the password for the ${CYAN}${BBDD}${NC} database user:"
+    echo -e "Please, provide the password for the ${CYAN}${BBDD}${NC} {$1} :"
     read -s PASS
 
     read -sp "Set the password (again): " PASS2
@@ -85,7 +85,7 @@ bbdd_user(){
   if [ $(runuser -l postgres -c "psql -c \"\\du ${BBDD}\" | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
   then    
     echo -e "${LCYAN}Creating the ${CYAN}${BBDD}${LCYAN} database user:${NC}"
-    pwd_req
+    pwd_req "postgresql database user"
     
     runuser -l postgres -c "psql -e -c 'CREATE USER \"${BBDD}\" WITH PASSWORD '\'${PASS}\'';'"
     runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${BBDD}\" OWNER TO \"${BBDD}\";'"
@@ -137,8 +137,7 @@ setup_files()
     if [ ${PASS} = ""];
     then    
       #if the bbdd already exists, the password must be provided
-      echo -e "Please, provide the password for the ${CYAN}${BBDD}${NC} database user:"
-      read -s PASS          
+      pwd_req "postgresql database user"              
     fi
     
     echo "Setting up database password..."
@@ -176,13 +175,11 @@ setup_django()
   if [ ${PASS} = ""];
   then    
     #if the bbdd already exists, the password must be provided
-    echo -e "Please, provide the password for the ${CYAN}${BBDD}${NC} django superuser:"
-    read -s PASS
-    echo ""          
+   pwd_req "django superuser"
   fi
   
   echo -e "Please, provide the email for the ${CYAN}${BBDD}${NC} django superuser:"
-  read -s EMAIL          
+  read EMAIL          
   echo ""
 
   DJANGO_SUPERUSER_PASSWORD=${PASS} \
