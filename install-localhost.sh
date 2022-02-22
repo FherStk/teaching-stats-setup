@@ -47,7 +47,7 @@ pip_req()
   fi
 }
 
-PWD_req()
+pwd_req()
 {
   echo ""
   while true; do
@@ -75,9 +75,16 @@ BBDD_user(){
   then
     echo ""
     echo "${LCYAN}Creating the '${BBDD}' database user:${NC}"
-    PWD_req() #stores in PWD var
+    echo ""
+    while true; do
+      read -s -p "Set the password for the '${BBDD}' database user:" PWD
+      echo
+      read -s -p "Set the password (again): " PWD2
+      echo
+      [ "$PWD" = "$PWD2" ] && break
+      echo "Password missmatch, please try again"
+    done 
 
-    echo "psql -e -c 'CREATE USER \"${BBDD}\" WITH PASSWORD '"'"'${PWD}'"'"';'" 
     runuser -l postgres -c "psql -e -c 'CREATE USER \"${BBDD}\" WITH PASSWORD '"'"'${PWD}'"'"';'"  #'"'"' means ' -> https://stackoverflow.com/a/1250279
     runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${BBDD}\" OWNER TO \"${BBDD}\";'"
   fi
