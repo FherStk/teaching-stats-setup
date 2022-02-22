@@ -169,8 +169,6 @@ setup_django()
   echo ""  
   python3 manage.py migrate --noinput  
   python3 dbsetup.py
-  
-  echo ""  
   python3 manage.py collectstatic --noinput
   
   echo ""    
