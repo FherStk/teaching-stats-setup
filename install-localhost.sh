@@ -206,9 +206,9 @@ pip_req psycopg2-binary 2.9.3
 bbdd_create
 bbdd_user
 
-bbdd_schema public
-bbdd_schema master
-bbdd_schema reports
+#bbdd_schema public
+#bbdd_schema master
+#bbdd_schema reports
 
 copy_files
 setup_files
