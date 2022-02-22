@@ -122,7 +122,7 @@ copy_files()
 
 setup_files()
 {
-  MARK="$DIR/home/status.done"
+  MARK="$DIR/home/setup.done"
   FILE="$DIR/home/settings.py"
 
   echo ""
@@ -157,35 +157,41 @@ setup_files()
 
 setup_django()
 {
+  MARK="$DIR/setup.done"
+
   echo ""  
-  echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django instance:${NC}"
-  
-  CURRENT=${PWD##*/}
-  
-  cd ${DIR}
-  python3 manage.py makemigrations --noinput
-  
-  echo ""  
-  python3 manage.py migrate --noinput  
-  python3 dbsetup.py
-  python3 manage.py collectstatic --noinput
-  
-  echo ""    
-  echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django superuser:${NC}"
-  if [ ${PASS} = ""];
-  then    
-    #if the bbdd already exists, the password must be provided
-   pwd_req "django superuser"
+  if ! [ -f "$MARK" ]; then    
+    echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django instance:${NC}"
+    
+    CURRENT=${PWD##*/}
+    
+    cd ${DIR}
+    python3 manage.py makemigrations --noinput
+    
+    echo ""  
+    python3 manage.py migrate --noinput  
+    python3 dbsetup.py
+    python3 manage.py collectstatic --noinput
+    
+    echo ""    
+    echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django superuser:${NC}"
+    if [ ${PASS} = ""];
+    then    
+      #if the bbdd already exists, the password must be provided
+    pwd_req "django superuser"
+    fi
+    
+    echo -e "Please, provide the email for the ${CYAN}${BBDD}${NC} django superuser:"
+    read EMAIL          
+    echo ""
+
+    DJANGO_SUPERUSER_PASSWORD=${PASS} \
+    python3 manage.py createsuperuser --noinput --username ${BBDD} --email ${EMAIL}
+
+    cd $HOME/${CURRENT}
+  else
+    echo -e "${CYAN}Django instance ${LCYAN}${FILE}${CYAN} setup already done, skipping...${NC}"
   fi
-  
-  echo -e "Please, provide the email for the ${CYAN}${BBDD}${NC} django superuser:"
-  read EMAIL          
-  echo ""
-
-  DJANGO_SUPERUSER_PASSWORD=${PASS} \
-  python3 manage.py createsuperuser --noinput --username ${BBDD} --email ${EMAIL}
-
-  cd $HOME/${CURRENT}
 }
 
 trap 'abort' 0
