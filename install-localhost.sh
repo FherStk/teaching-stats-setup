@@ -144,11 +144,11 @@ setup_django()
 {
   echo ""  
   echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django instance:${NC}"
-  python ${DIR}/manage.py makemigrations
-  python ${DIR}/manage.py migrate
-  python ${DIR}/dbsetup.py
-  python ${DIR}/manage.py collectstatic
-  python ${DIR}/manage.py createsuperuser
+  python3 ${DIR}/manage.py makemigrations
+  python3 ${DIR}/manage.py migrate
+  python3 ${DIR}/dbsetup.py
+  python3 ${DIR}/manage.py collectstatic
+  python3 ${DIR}/manage.py createsuperuser
 }
 
 trap 'abort' 0
