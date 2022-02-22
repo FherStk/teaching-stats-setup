@@ -126,7 +126,7 @@ setup_files()
   FILE="$DIR/home/settings.py"
 
   echo ""
-  if ! [ -d "$MARK" ]; then    
+  if ! [ -f "$MARK" ]; then    
     echo -e "${LCYAN}Setting up the django file ${CYAN}${FILE}${LCYAN}:${NC}"
     echo "Setting up database name..."
     sed -i "s/'YOUR-DATABASE'/'${BBDD}'/g" ${FILE}
