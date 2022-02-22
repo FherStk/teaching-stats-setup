@@ -137,7 +137,7 @@ setup_files()
     if [ ${PWD} = ""];
     then    
       #if the bbdd already exists, the password must be provided
-      echo -e "Please, provide the password for the ${CYAN}${BBDD}${LCYAN} database user:${NC}"
+      echo -e "Please, provide the password for the ${CYAN}${BBDD}${NC} database user:"
       read -s PWD          
     fi
     
@@ -161,9 +161,17 @@ setup_django()
   echo ""  
   echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django instance:${NC}"
   python3 ${DIR}/manage.py makemigrations
+  
+  echo ""  
   python3 ${DIR}/manage.py migrate
+  
+  echo ""  
   python3 ${DIR}/dbsetup.py
+  
+  echo ""  
   python3 ${DIR}/manage.py collectstatic
+  
+  echo ""    
   python3 ${DIR}/manage.py createsuperuser
 }
 
