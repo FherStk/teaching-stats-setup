@@ -67,9 +67,9 @@ pwd_req()
 {  
   while true; do
     echo ""
-    read -sp "Set the password for the ${CYAN}${BBDD}${LCYAN} database user:" PWD
+    read -e -sp "Set the password for the ${CYAN}${BBDD}${LCYAN} database user:" PWD
     echo
-    read -sp "Set the password (again): " PWD2
+    read -e -sp "Set the password (again): " PWD2
     echo
     [ "$PWD" = "$PWD2" ] && break
     echo "${RED}Password missmatch, please try again.${NC}"
