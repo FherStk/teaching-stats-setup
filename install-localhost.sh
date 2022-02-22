@@ -78,7 +78,7 @@ BBDD_user(){
     PWD_req() #stores in PWD var
 
     runuser -l postgres -c "psql -e -c \"CREATE USER \"${BBDD}\" WITH PASSWORD '"'"'${PWD}'"'"';\""  #'"'"' means ' -> https://stackoverflow.com/a/1250279
-    runuser -l postgres -c "psql -e -c \"ALTER DATABASE \"${BBDD}\" OWNER TO \"${BBDD}\";\""
+    runuser -l postgres -c 'psql -e -c "ALTER DATABASE \"${BBDD}\" OWNER TO \"${BBDD}\";\"'
   fi
 }
 
