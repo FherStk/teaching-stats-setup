@@ -30,32 +30,36 @@ abort()
 
 apt_req()
 {
+  echo ""
   if [ $(dpkg-query -W -f='${Status}' ${1} 2>/dev/null | grep -c "ok installed") -eq 0 ];
-  then
-    echo ""
+  then    
     echo -e "${LCYAN}Installing requirements: ${CYAN}${1}${NC}"
     apt install -y ${1};    
   else 
-    echo -e "${LCYAN}Requirement ${CYAN}${1}${LCYAN} already installed.${NC}"
+    echo -e "${LCYAN}Requirement ${CYAN}${1}${LCYAN} already installed, skipping...${NC}"
   fi
 }
 
 pip_req()
 {
+  echo ""
   if [ $(pip3 list 2>/dev/null | grep -io -c "${1}") -eq 0 ];
-  then
-    echo ""
+  then    
     echo -e "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
     pip3 install ${1}==${2};    
+  else 
+    echo -e "${LCYAN}Requirement ${CYAN}${1}${LCYAN} already installed, skipping...${NC}"
   fi
 }
 
 copy()
 {
-  if ! [ -d "$DIR" ]; then
-    echo ""
-    echo -e "${LCYAN}Copying files:${NC}"
+  echo ""
+  if ! [ -d "$DIR" ]; then    
+    echo -e "${LCYAN}Copying files into ${CYAN}${BBDD}${LCYAN}:${NC}"
     cp -r -v "${BBDD}" "/var/www/${BBDD}"
+  else
+    echo -e "${LCYAN}Files already copied within ${CYAN}${BBDD}${LCYAN}, skipping...${NC}"
   fi
 }
 
@@ -63,45 +67,53 @@ pwd_req()
 {  
   while true; do
     echo ""
-    read -sp "Set the password for the '${BBDD}' database user:" PWD
+    read -sp "Set the password for the ${CYAN}${BBDD}${LCYAN} database user:" PWD
     echo
     read -sp "Set the password (again): " PWD2
     echo
     [ "$PWD" = "$PWD2" ] && break
-    echo "Password missmatch, please try again"
+    echo "${RED}Password missmatch, please try again.${NC}"
   done  
 }
 
 BBDD_create()
 {
+  echo ""
   if [ $(runuser -l postgres -c "psql -lqt | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
-  then
-    echo ""
-    echo -e "${LCYAN}Creating the '${BBDD}' database:${NC}"
+  then    
+    echo -e "${LCYAN}Creating the ${CYAN}${BBDD}${LCYAN} database:${NC}"
     runuser -l postgres -c "createdb -e ${BBDD}"
+  else
+    echo -e "${LCYAN}The database ${CYAN}${BBDD}${LCYAN} already exists, skipping...${NC}"
   fi
 }
 
 BBDD_user(){
+  echo ""
   if [ $(runuser -l postgres -c "psql -c \"\\du ${BBDD}\" | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
-  then
-    echo ""
-    echo -e "${LCYAN}Creating the '${BBDD}' database user:${NC}"
+  then    
+    echo -e "${LCYAN}Creating the ${CYAN}${BBDD}${LCYAN} database user:${NC}"
     pwd_req
     
     runuser -l postgres -c "psql -e -c 'CREATE USER \"${BBDD}\" WITH PASSWORD '\'${PWD}\'';'"
     runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${BBDD}\" OWNER TO \"${BBDD}\";'"
+
+  else
+    echo -e "${LCYAN}The database user ${CYAN}${BBDD}${LCYAN} already exists, skipping...${NC}"
   fi
 }
 
 BBDD_schema(){
+  echo ""
   if [ $(runuser -l postgres -c "psql -d \"${BBDD}\" -e -c \"SELECT schema_name FROM information_schema.schemata;\" | cut -d \| -f 1 | grep -c ${1}") -eq 0 ];
-  then
-    echo ""
-    echo -e "${LCYAN}Creating the '${1}' database schema:${NC}"
+  then    
+    echo -e "${LCYAN}Creating the ${CYAN}${1}${LCYAN} database schema:${NC}"
 
     runuser -l postgres -c "psql -d \"${BBDD}\" -e -c \"CREATE SCHEMA ${1};\""
     runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'ALTER SCHEMA \"${1}\" OWNER TO \"${BBDD}\";'"
+
+  else
+    echo -e "${LCYAN}The database schema ${CYAN}${1}${LCYAN} already exists, skipping...${NC}"
   fi
 }
 
