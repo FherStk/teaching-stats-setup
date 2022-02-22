@@ -179,10 +179,10 @@ setup_django()
     echo -e "Please, provide the password for the ${CYAN}${BBDD}${NC} django superuser:"
     read -s PASS          
   fi
-  
+
   DJANGO_SUPERUSER_USERNAME=${BBDD} \
   DJANGO_SUPERUSER_PASSWORD=${PASS} \
-  DJANGO_SUPERUSER_EMAIL= \
+  DJANGO_SUPERUSER_EMAIL="" \
   python3 manage.py createsuperuser --noinput
 
   cd $HOME/${CURRENT}
