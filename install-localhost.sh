@@ -189,6 +189,7 @@ setup_django()
     python3 manage.py createsuperuser --noinput --username ${BBDD} --email ${EMAIL}
 
     cd $HOME/${CURRENT}
+    touch $MARK
   else
     echo -e "${CYAN}Django instance ${LCYAN}${FILE}${CYAN} setup already done, skipping...${NC}"
   fi
