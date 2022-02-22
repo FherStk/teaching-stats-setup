@@ -17,6 +17,7 @@ CYAN='\033[0;36m'
 LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
 BBDD='teaching-stats'
+DIR="/var/www/${BBDD}/"
 PWD=''
 
 abort()
@@ -44,6 +45,15 @@ pip_req()
     echo ""
     echo -e "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
     pip3 install ${1}==${2};    
+  fi
+}
+
+copy()
+{
+  if [ -d "$DIR" ]; then
+    echo ""
+    echo -e "${LCYAN}Copying files:${NC}"
+    cp -r -v "${BBDD}" "/var/www/${BBDD}"
   fi
 }
 
@@ -116,9 +126,7 @@ pip_req django 4.0.1
 pip_req django-allauth 0.47.0
 pip_req psycopg2-binary 2.9.3
 
-echo ""
-echo -e "${LCYAN}Copying files:${NC}"
-cp -r -v "${BBDD}" "/var/www/${BBDD}"
+copy
 
 BBDD_create
 BBDD_user
