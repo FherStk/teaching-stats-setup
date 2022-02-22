@@ -181,7 +181,7 @@ setup_django()
   fi
   
   DJANGO_SUPERUSER_PASSWORD=${PASS} \
-  python3 manage.py createsuperuser --username ${BBDD}
+  python3 manage.py createsuperuser --noinput --username ${BBDD} -- email somemail@somedomain.com
 
   cd $HOME/${CURRENT}
 }
