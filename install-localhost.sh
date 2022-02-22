@@ -56,7 +56,7 @@ pip_req()
 pwd_req()
 {  
   while true; do    
-    echo -e "Please, provide the password for the ${CYAN}${BBDD}${NC} ${1} :"
+    echo -e "Please, provide the password for the ${CYAN}${BBDD}${NC} ${1}:"
     read -s PASS
 
     read -sp "Set the password (again): " PASS2
