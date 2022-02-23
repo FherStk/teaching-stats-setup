@@ -63,7 +63,8 @@ pwd_req()
     echo -e "${ORANGE}Please, provide the password for the ${CYAN}${BBDD}${ORANGE} ${1}:${NC}"
     read -s PASS
 
-    read -sp "${ORANGE}Set the password (again):${NC} " PASS2
+    echo -e "${ORANGE}Set the password (again):${NC}"
+    read -s PASS2
     echo ""
 
     [ "$PASS" = "$PASS2" ] && break
