@@ -253,6 +253,9 @@ setup_gauth(){
     echo -e "${LCYAN}Setting up django's social account:${NC}"
     CURRENT=${PWD##*/}
     
+    echo "Setting up the allowed hosts..."     
+    sed -i "s/'ALLOWED_HOSTS = ['\'localhost\'']'/''\'${HOST}\''/g" ${FILE}    
+
     cd ${DIR}
     python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use '0.0.0.0:8000' when running within a container, in order to allow remote connections
     PID=$!  
