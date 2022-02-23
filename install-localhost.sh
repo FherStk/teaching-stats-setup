@@ -204,7 +204,7 @@ setup_gauth(){
   
   echo ""  
   if ! [ -f "$MARK" ]; then    
-    if ! [ -z "$EMAIL" ]; then    
+    if [ -z "$EMAIL" ]; then    
       EMAIL="<your email>"
     fi
 
