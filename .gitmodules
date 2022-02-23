@@ -1,3 +1,9 @@
 [submodule "teaching-stats"]
 	path = teaching-stats
 	url = https://github.com/Marcos-A/teaching-stats.git
+[submodule "teaching-stats-db-population"]
+	path = teaching-stats-db-population
+	url = https://github.com/Marcos-A/teaching-stats-db-population.git
+[submodule "teaching-stats-import-students"]
+	path = teaching-stats-import-students
+	url = https://github.com/Marcos-A/teaching-stats-import-students.git
