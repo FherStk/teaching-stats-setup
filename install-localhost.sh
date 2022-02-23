@@ -50,12 +50,12 @@ pip_req()
   echo ""
   if [ $(pip3 list 2>/dev/null | grep -io -c "${1}") -eq 0 ];
   then        
-    if ! [ -f "$MARK" ]; then 
-      echo -e "${LCYAN}Installing requirements: ${CYAN}${1}${NC}"
-      pip3 install ${1};
-    else
+    if [ -f "$MARK" ]; then 
       echo -e "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
       pip3 install ${1}==${2};    
+    else
+      echo -e "${LCYAN}Installing requirements: ${CYAN}${1}${NC}"
+      pip3 install ${1};      
     fi
     
   else 
@@ -352,7 +352,10 @@ populate_master(){
 
       touch ${FILE}
       echo "[postgresql]\nhost=${HOST}\ndatabase=${BBDD}\nuser=${BBDD}\npassword=${PASS}\nport=${PSQL_PORT}\options=-c search_path=dbo,master" > ${FILE}
-      python3 ${FOLDER}/insert_data.py
+
+      cd ${FOLDER}
+      python3 insert_data.py
+      cd ..
     fi
 
     touch MARK
