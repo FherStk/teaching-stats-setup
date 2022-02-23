@@ -247,9 +247,9 @@ setup_gauth(){
     
     cd ${DIR}
     python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use this when running within a container, in order to allow remote connections    
-    PID=$!
+    PID=$!  
 
-    echo -e "    1. Visit the django's admin site ${CYAN}${URL}/admin${NC} and log in as superuser."
+    echo -e "    1. Visit the django's admin site ${CYAN}${URL}/admin${NC} and log in as ${CYAN}${BBDD}${NC} superuser."
     echo -e "    2. Go to Sites → Site → Add site. Set it up:"
     echo -e "        Domain name: ${CYAN}${URL}${NC}"
     echo -e "        Display name: ${CYAN}${URL}${NC}"
