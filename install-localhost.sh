@@ -19,11 +19,10 @@ LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
 BBDD='teaching-stats'
 DIR="/var/www/${BBDD}"
-HOST='127.0.0.1'
-URL="http://${HOST}:8000"
 VERSION="0.0.3"
 PASS=''
 EMAIL=''
+HOST=''
 
 abort()
 {
@@ -205,15 +204,17 @@ setup_gauth(){
   echo ""  
   if ! [ -f "$MARK" ]; then        
     
-    echo -e "${ORANGE}Please, provide the ${CYAN}current localhost IP address${ORANGE} [127.0.0.1]:${NC}"
-    read -s IP
-    if ! [ -z "$IP" ]; then    
-      HOST=${IP}
+    echo -e "${ORANGE}Please, provide an ${CYAN}IP address${ORANGE} if you want to override the default localhost (127.0.0.1), otherwise leave it in blank${ORANGE}:${NC}"
+    read IP
+    if [ -z "$IP" ]; then    
+      HOST="127.0.0.1"
     fi
 
     if [ -z "$EMAIL" ]; then    
       EMAIL="<your email>"
     fi
+
+    URL="http://${HOST}:8000"
 
     echo -e "${LCYAN}Setting up Google Authentication:${NC}"
     echo -e "    1. Visit the Google Developers Console at ${CYAN}https://console.developers.google.com/projectcreate${NC} and log in with your Google account."
