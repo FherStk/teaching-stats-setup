@@ -19,6 +19,7 @@ LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
 BBDD='teaching-stats'
 DIR="/var/www/${BBDD}"
+PSQL_PORT="5432"
 VERSION="0.0.4"
 PASS=''
 EMAIL=''
@@ -159,7 +160,7 @@ setup_files()
     sed -i "s/'YOUR-HOST'/'localhost'/g" ${FILE}
 
     echo "Setting up database port..."
-    sed -i "s/'YOUR-PORT'/'5432'/g" ${FILE}    
+    sed -i "s/'YOUR-PORT'/'${PSQL_PORT}'/g" ${FILE}    
     
     echo "Setting up database password..."
     sed -i "s/'YOUR-PASSWORD'/'${PASS}'/g" ${FILE}
@@ -315,6 +316,39 @@ setup_site(){
   fi
 }
 
+populate_master(){
+  MARK="$DIR/populate-master.done"
+  FOLDER="teaching-stats-db-population"
+  FILE=${FOLDER}/database.ini
+
+  echo ""  
+  if ! [ -f "$MARK" ]; then        
+    echo -e "${LCYAN}Populating demo master data within the ${CYAN}${BBDD}${LCYAN} database:${NC}"    
+    echo -e "    1. Go to the ${CYAN}${FOLDER}${NC} folder."
+    echo -e "    2. Review each master file and perform any modification you need."
+    echo -e "    3. Each master file will be loaded and its data will be pupulated through the database."
+    echo ""
+    echo -e "${ORANGE}Do you want to proceed loading the master data into the ${CYAN}${BBDD}${LCYAN} database using the previous files?[y/N]${NC}"
+    read CONTINUE
+
+    if [ "$CONTINUE"="y" ]; then    
+      if [ -z "$HOST" ]; then    
+        host_req
+      fi
+
+      if [ -z "$PASS" ]; then    
+        pwd_req "${BBDD} database user"
+      fi
+
+      touch ${FILE}
+      echo "[postgresql]\nhost=${HOST}\ndatabase=${BBDD}\nuser=${BBDD}\npassword=${PASS}\nport=${PSQL_PORT}\options=-c search_path=dbo,master" > ${FILE}
+      python3 ${FOLDER}/insert_data.py
+    fi
+  else
+    echo -e "${CYAN}Master data for the ${LCYAN}${BBDD}${CYAN} database already populated, skipping...${NC}"
+  fi
+}
+
 trap 'abort' 0
 set -e
 
@@ -350,8 +384,9 @@ bbdd_schema reports
 copy_files
 setup_files
 setup_django
-
 setup_gauth
+
+populate_master
 
 trap : 0
 echo ""
