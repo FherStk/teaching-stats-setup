@@ -353,8 +353,8 @@ populate_master(){
       touch ${FILE}
       echo "[postgresql]\nhost=${HOST}\ndatabase=${BBDD}\nuser=${BBDD}\npassword=${PASS}\nport=${PSQL_PORT}\options=-c search_path=dbo,master" > ${FILE}
 
-      cd ${FOLDER}
-      python3 insert_data.py
+      cd ${FOLDER}      
+      runuser -l postgres -c "python3 insert_data.py"
       cd ..
     fi
 
