@@ -265,7 +265,7 @@ setup_gauth(){
     read 
 
     kill $PID
-    cd ${CURRENT}
+    cd $HOME/${CURRENT}
     touch $MARK
 
   else
