@@ -204,6 +204,10 @@ setup_gauth(){
   
   echo ""  
   if ! [ -f "$MARK" ]; then    
+    if ! [ -z "$EMAIL" ]; then    
+      EMAIL="<your email>"
+    fi
+
     echo -e "${LCYAN}Setting up Google Authentication ${ORANGE}(manual action needed)${NC}:"
     echo -e "    1. Visit the Google Developers Console at ${CYAN}https://console.developers.google.com${NC} and log in with your Google account."
     echo -e "    2. Create a new project called ${CYAN}${BBDD}${NC}."
