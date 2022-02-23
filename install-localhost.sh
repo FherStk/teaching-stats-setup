@@ -50,7 +50,7 @@ pip_req()
   echo ""
   if [ $(pip3 list 2>/dev/null | grep -io -c "${1}") -eq 0 ];
   then        
-    if [ -f "$MARK" ]; then 
+    if ! [ -f "$MARK" ]; then 
       echo -e "${LCYAN}Installing requirements: ${CYAN}${1}${NC}"
       pip3 install ${1};
     else
