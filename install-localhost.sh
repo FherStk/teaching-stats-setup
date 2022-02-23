@@ -152,6 +152,8 @@ setup_files()
 
     echo "Setting up database port..."
     sed -i "s/'YOUR-PORT'/'5432'/g" ${FILE}    
+
+    #TODO: set the allowed sites here (ask for IP if not given)
     
     touch $MARK
   else
@@ -254,7 +256,7 @@ setup_gauth(){
     CURRENT=${PWD##*/}
     
     echo "Setting up the allowed hosts..."     
-    sed -i "s/'ALLOWED_HOSTS = ['\'localhost\'']'/''\'${HOST}\''/g" ${FILE}    
+    sed -i "s/'ALLOWED_HOSTS = ['\'localhost\'']'/''\'${HOST}\''/g" ${FILE}    #TODO: FIX THIS LINE
 
     cd ${DIR}
     python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use '0.0.0.0:8000' when running within a container, in order to allow remote connections
