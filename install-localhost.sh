@@ -19,8 +19,8 @@ LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
 BBDD='teaching-stats'
 DIR="/var/www/${BBDD}"
-DOMAIN='127.0.0.1'
-URL="http://${DOMAIN}:8000"
+HOST='127.0.0.1'
+URL="http://${HOST}:8000"
 VERSION="0.0.3"
 PASS=''
 EMAIL=''
@@ -60,10 +60,10 @@ pip_req()
 pwd_req()
 {  
   while true; do        
-    echo -e "Please, provide the password for the ${CYAN}${BBDD}${NC} ${1}${ORANGE}(manual action needed)${NC}:"
+    echo -e "${ORANGE}Please, provide the password for the ${CYAN}${BBDD}${ORANGE} ${1}:${NC}"
     read -s PASS
 
-    read -sp "Set the password (again): " PASS2
+    read -sp "${ORANGE}Set the password (again):${NC} " PASS2
     echo ""
 
     [ "$PASS" = "$PASS2" ] && break
@@ -185,7 +185,7 @@ setup_django()
     pwd_req "django superuser"
     fi
     
-    echo -e "Please, provide the email for the ${CYAN}${BBDD}${NC} django superuser ${ORANGE}(manual action needed)${NC}:"
+    echo -e "${ORANGE}Please, provide the email for the ${CYAN}${BBDD}${ORANGE} django superuser:${NC}"
     read EMAIL          
     echo ""
 
@@ -203,12 +203,19 @@ setup_gauth(){
   MARK="$DIR/setup-gauth.done"
   
   echo ""  
-  if ! [ -f "$MARK" ]; then    
+  if ! [ -f "$MARK" ]; then        
+    
+    echo -e "${ORANGE}Please, provide the ${CYAN}current localhost IP address${ORANGE} [127.0.0.1]:${NC}"
+    read -s IP
+    if ! [ -z "$IP" ]; then    
+      HOST=${IP}
+    fi
+
     if [ -z "$EMAIL" ]; then    
       EMAIL="<your email>"
     fi
 
-    echo -e "${LCYAN}Setting up Google Authentication ${ORANGE}(manual action needed)${NC}:"
+    echo -e "${LCYAN}Setting up Google Authentication:${NC}"
     echo -e "    1. Visit the Google Developers Console at ${CYAN}https://console.developers.google.com/projectcreate${NC} and log in with your Google account."
     echo -e "        1.1. Project name: ${CYAN}${BBDD}${NC}"
     echo -e "        1.2. Leave the other fields with its default values."
@@ -242,11 +249,11 @@ setup_gauth(){
     read 
 
     echo ""
-    echo -e "${LCYAN}Setting up django's social account ${ORANGE}(manual action needed)${NC}:"
+    echo -e "${LCYAN}Setting up django's social account:${NC}"
     CURRENT=${PWD##*/}
     
     cd ${DIR}
-    python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use this when running within a container, in order to allow remote connections    
+    python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use '0.0.0.0:8000' when running within a container, in order to allow remote connections
     PID=$!  
 
     echo -e "    1. Visit the django's admin site ${CYAN}${URL}/admin${NC} and log in as ${CYAN}${BBDD}${NC} superuser."
@@ -259,7 +266,7 @@ setup_gauth(){
     echo -e "        Client id: ${CYAN}<your client id>${NC}"
     echo -e "        Secret key: ${CYAN}<your secret key>${NC}"
     echo -e "        You can leave the ${CYAN}key${NC} field empty."
-    echo -e "    4. Add ${CYAN}${DOMAIN}:8000${NC} to Chosen sites and save the new settings."
+    echo -e "    4. Add ${CYAN}${HOST}:8000${NC} to Chosen sites and save the new settings."
     echo ""
     echo -e "Once completed the previous configuration, ${ORANGE}press any key to continue...${NC}"
     read 
@@ -282,9 +289,9 @@ setup_site(){
     echo -e "${LCYAN}Setting up the site django data within ${CYAN}${FILE}${LCYAN}:${NC}"
     echo "Setting up the site secret key..." 
     SECRET=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
-    sed -i "s/'YOUR-SECRET-KEY'/'${SECRET}'/g" ${FILE}    
-    
-    ID=$(runuser -l postgres -c "psql -d \"${BBDD}\" -qtAX -c 'SELECT * FROM django_site WHERE name='\'${DOMAIN}:8000\'';'")    
+    sed -i "s/'YOUR-SECRET-KEY'/'${SECRET}'/g" ${FILE}          
+
+    ID=$(runuser -l postgres -c "psql -d \"${BBDD}\" -qtAX -c 'SELECT * FROM django_site WHERE name='\'${HOST}:8000\'';'")    
     if ! [ -z "$ID" ]; then    
       echo "Setting up the site ID..."    
       sed -i "s/'SITE_ID = 1'/'SITE_ID = ${ID}'/g" ${FILE}
