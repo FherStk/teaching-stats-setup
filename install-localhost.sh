@@ -13,13 +13,17 @@
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+ORANGE='\033[0;33m'
 CYAN='\033[0;36m'
 LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
 BBDD='teaching-stats'
 DIR="/var/www/${BBDD}"
+DOMAIN='127.0.0.1'
+URL="http://${DOMAIN}:8000"
 VERSION="0.0.3"
 PASS=''
+EMAIL=''
 
 abort()
 {
@@ -122,12 +126,12 @@ copy_files()
 
 setup_files()
 {
-  MARK="$DIR/home/setup.done"
+  MARK="$DIR/setup-files.done"
   FILE="$DIR/home/settings.py"
 
   echo ""
   if ! [ -f "$MARK" ]; then    
-    echo -e "${LCYAN}Setting up the django file ${CYAN}${FILE}${LCYAN}:${NC}"
+    echo -e "${LCYAN}Setting up the initial django data within ${CYAN}${FILE}${LCYAN}:${NC}"
     echo "Setting up database name..."
     sed -i "s/'YOUR-DATABASE'/'${BBDD}'/g" ${FILE}
 
@@ -147,20 +151,17 @@ setup_files()
     sed -i "s/'YOUR-HOST'/'localhost'/g" ${FILE}
 
     echo "Setting up database port..."
-    sed -i "s/'YOUR-PORT'/'5432'/g" ${FILE}
-
-    #SECRET
-    #python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())
-
+    sed -i "s/'YOUR-PORT'/'5432'/g" ${FILE}    
+    
     touch $MARK
   else
-    echo -e "${CYAN}Django file ${LCYAN}${FILE}${CYAN} setup already done, skipping...${NC}"
+    echo -e "${CYAN}Django file ${LCYAN}${FILE}${CYAN} setup for the initial data is already done, skipping...${NC}"
   fi
 }
 
 setup_django()
 {
-  MARK="$DIR/setup.done"
+  MARK="$DIR/setup-django.done"
 
   echo ""  
   if ! [ -f "$MARK" ]; then    
@@ -195,6 +196,87 @@ setup_django()
     touch $MARK
   else
     echo -e "${CYAN}Django instance ${LCYAN}${FILE}${CYAN} setup already done, skipping...${NC}"
+  fi
+}
+
+setup_gauth(){
+  MARK="$DIR/setup-gauth.done"
+  
+  echo ""  
+  if ! [ -f "$MARK" ]; then    
+    echo -e "${LCYAN}Setting up Google Authentication ${ORANGE}(manual action needed)${NC}:"
+    echo -e "    1. Visit the Google Developers Console at ${LCYAN}https://console.developers.google.com${NC} and log in with your Google account."
+    echo -e "    2. Create a new project called ${LCYAN}${BBDD}${NC}."
+    echo -e "    3. Go to Credentials → Create credentials → OAuth client ID."
+    echo -e "    4. Set OAuth consent screen to External."
+    echo -e "    5. Add the following app information:"
+    echo -e "        App name: ${LCYAN}${BBDD}${NC}"
+    echo -e "        Support email: ${LCYAN}${EMAIL}${NC}"
+    echo -e "        Developer contact information: ${LCYAN}${EMAIL}${NC}"
+    echo -e "    6. Save and continue."
+    echo -e "    7. Set  it up:"
+    echo -e "        Application type: ${LCYAN}Web application${NC}"
+    echo -e "        Name: ${LCYAN}${BBDD}${NC}"
+    echo -e "        Authorized JavaScript origins → Add URI: ${LCYAN}${URL}${NC}"
+    echo -e "        Authorized redirect URIs → Add URI: ${LCYAN}${URL}/google/login/callback/${NC}"
+    echo -e "    8. Copy your ${LCYAN}client id${NC} and ${LCYAN}secret key${NC}, it will be required later."
+    echo ""
+    echo "Once completed the previous configuration, press any key to continue..."
+    
+    echo ""
+    echo -e "${LCYAN}Setting up django's social account ${ORANGE}(manual action needed)${NC}:"
+    CURRENT=${PWD##*/}
+    
+    cd ${DIR}
+    python3 manage.py runserver &    
+    PID=$!
+
+    echo -e "    1. Visit the django's admin site ${LCYAN}${URL}/admin${NC} and log in as superuser."
+    echo -e "    2. Go to Sites → Site → Add site. Set it up:"
+    echo -e "        Domain name: ${LCYAN}${URL}${NC}"
+    echo -e "        Display name: ${LCYAN}${URL}${NC}"
+    echo -e "    3. Go to Social accounts → Social applications → Add social application. Set it up:"
+    echo -e "        Provider: ${LCYAN}Google${NC}"
+    echo -e "        Name: ${LCYAN}google-api${NC}"
+    echo -e "        Client id: ${LCYAN}<your client id>${NC}"
+    echo -e "        Secret key: ${LCYAN}<your secret key>${NC}"
+    echo -e "        You can leave the ${LCYAN}key${NC} field empty."
+    echo -e "    4. Add ${LCYAN}${DOMAIN}:8000${NC} to Chosen sites and save the new settings."
+    echo ""
+    echo "Once completed the previous configuration, press any key to continue..."
+
+    kill $PID
+    cd ${CURRENT}
+    touch $MARK
+
+  else
+    echo -e "${CYAN}Google Authentication setup already done, skipping...${NC}"
+  fi
+}
+
+setup_site(){
+  MARK="$DIR/setup-site.done"
+  FILE="$DIR/home/settings.py"
+
+  echo ""  
+  if ! [ -f "$MARK" ]; then    
+    echo -e "${LCYAN}Setting up the site django data within ${CYAN}${FILE}${LCYAN}:${NC}"
+    echo "Setting up the site secret key..." 
+    SECRET=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
+    sed -i "s/'YOUR-SECRET-KEY'/'${SECRET}'/g" ${FILE}
+
+    echo "Setting up allowed hosts..."
+    sed -i "s/'YOUR-HOST'/'${DOMAIN},localhost'/g" ${FILE}
+    
+    ID=$(runuser -l postgres -c "psql -d \"${BBDD}\" -qtAX -c 'SELECT * FROM django_site WHERE name='\'${DOMAIN}:8000\'';'")    
+    if ! [ -z "$ID" ]; then    
+      echo "Setting up the site ID..."    
+      sed -i "s/'SITE_ID = 1'/'SITE_ID = ${ID}'/g" ${FILE}
+    fi
+
+    touch $MARK
+  else
+    echo -e "${CYAN}Django file ${LCYAN}${FILE}${CYAN} setup for the site data is already done, skipping...${NC}"
   fi
 }
 
@@ -233,6 +315,8 @@ bbdd_schema reports
 copy_files
 setup_files
 setup_django
+
+setup_gauth
 
 trap : 0
 echo ""
