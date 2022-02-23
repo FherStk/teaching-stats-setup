@@ -75,10 +75,14 @@ pwd_req()
 
 host_req()
 {  
-  echo -e "${ORANGE}Please, provide an ${CYAN}IP address${ORANGE} if you want to override the default localhost (127.0.0.1), otherwise leave it in blank${ORANGE}:${NC}"
-  read HOST
-  if [ -z "$HOST" ]; then    
-    HOST="127.0.0.1"
+  LOCAL="127.0.0.1"
+  IPv4=$(hostname -I | cut -d' ' -f1)
+  echo -e "${ORANGE}Do you like to use ${CYAN}${IPv4}${ORANGE} as the current host address? Otherwise ${CYAN}${LOCAL}${ORANGE} will be used${ORANGE}:${NC} [y/N]"
+  read CONTINUE
+  if [ "$CONTINUE"="y" ]; then    
+    HOST=${IPv4}
+  else
+    HOST=${LOCAL}
   fi
 }
 
