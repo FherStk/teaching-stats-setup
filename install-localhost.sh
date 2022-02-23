@@ -180,10 +180,9 @@ setup_django()
     
     echo ""    
     echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django superuser:${NC}"
-    if [ ${PASS} = ""];
-    then    
+    if [ -z "$PASS" ]; then    
       #if the bbdd already exists, the password must be provided
-    pwd_req "django superuser"
+      pwd_req "django superuser"
     fi
     
     echo -e "${ORANGE}Please, provide the email for the ${CYAN}${BBDD}${ORANGE} django superuser:${NC}"
