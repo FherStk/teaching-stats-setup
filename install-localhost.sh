@@ -59,8 +59,8 @@ pip_req()
 
 pwd_req()
 {  
-  while true; do    
-    echo -e "Please, provide the password for the ${CYAN}${BBDD}${NC} ${1}:"
+  while true; do        
+    echo -e "Please, provide the password for the ${CYAN}${BBDD}${NC} ${1}${ORANGE}(manual action needed)${NC}:"
     read -s PASS
 
     read -sp "Set the password (again): " PASS2
@@ -185,7 +185,7 @@ setup_django()
     pwd_req "django superuser"
     fi
     
-    echo -e "Please, provide the email for the ${CYAN}${BBDD}${NC} django superuser:"
+    echo -e "Please, provide the email for the ${CYAN}${BBDD}${NC} django superuser ${ORANGE}(manual action needed)${NC}:"
     read EMAIL          
     echo ""
 
@@ -221,7 +221,7 @@ setup_gauth(){
     echo -e "        Authorized redirect URIs → Add URI: ${LCYAN}${URL}/google/login/callback/${NC}"
     echo -e "    8. Copy your ${LCYAN}client id${NC} and ${LCYAN}secret key${NC}, it will be required later."
     echo ""
-    echo "Once completed the previous configuration, press any key to continue..."
+    echo "Once completed the previous configuration, ${ORANGE}press any key to continue...${NC}"
     read 
 
     echo ""
@@ -244,7 +244,7 @@ setup_gauth(){
     echo -e "        You can leave the ${LCYAN}key${NC} field empty."
     echo -e "    4. Add ${LCYAN}${DOMAIN}:8000${NC} to Chosen sites and save the new settings."
     echo ""
-    echo "Once completed the previous configuration, press any key to continue..."
+    echo "Once completed the previous configuration, ${ORANGE}press any key to continue...${NC}"
     read 
 
     kill $PID
