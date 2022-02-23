@@ -104,6 +104,13 @@ bbdd_create()
   fi
 }
 
+bbdd_root(){
+  USER=$(whoami)
+  #TODO: check for the user, if does not exists, create as superuser with no pwd 
+  #Get the current psql version in order to get the folder with the current pg_hba
+  #Add an entry into the pg_hba to allow the current user use psql with no login
+}
+
 bbdd_user(){
   echo ""
   if [ $(runuser -l postgres -c "psql -c \"\\du ${BBDD}\" | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
@@ -354,7 +361,7 @@ populate_master(){
       echo "[postgresql]\nhost=${HOST}\ndatabase=${BBDD}\nuser=${BBDD}\npassword=${PASS}\nport=${PSQL_PORT}\options=-c search_path=dbo,master" > ${FILE}
 
       cd ${FOLDER}      
-      runuser -l postgres -c "python3 insert_data.py"
+      python3 insert_data.py #TODO: root user for postgres must be created first.
       cd ..
     fi
 
@@ -390,6 +397,7 @@ pip_req django-allauth 0.47.0
 pip_req psycopg2-binary 2.9.3
 pip_req pytz
 
+bbdd_root
 bbdd_create
 bbdd_user
 
