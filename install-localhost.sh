@@ -72,6 +72,15 @@ pwd_req()
   done  
 }
 
+host_req()
+{  
+  echo -e "${ORANGE}Please, provide an ${CYAN}IP address${ORANGE} if you want to override the default localhost (127.0.0.1), otherwise leave it in blank${ORANGE}:${NC}"
+  read HOST
+  if [ -z "$HOST" ]; then    
+    HOST="127.0.0.1"
+  fi
+}
+
 bbdd_create()
 {
   echo ""
@@ -144,16 +153,19 @@ setup_files()
       pwd_req "postgresql database user"              
     fi
     
-    echo "Setting up database password..."
-    sed -i "s/'YOUR-PASSWORD'/'${PASS}'/g" ${FILE}
+    host_req
 
     echo "Setting up database host..."
     sed -i "s/'YOUR-HOST'/'localhost'/g" ${FILE}
 
     echo "Setting up database port..."
     sed -i "s/'YOUR-PORT'/'5432'/g" ${FILE}    
-
-    #TODO: set the allowed sites here (ask for IP if not given)
+    
+    echo "Setting up database password..."
+    sed -i "s/'YOUR-PASSWORD'/'${PASS}'/g" ${FILE}
+    
+    echo "Setting up the allowed hosts..."     
+    sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}'\]/g" /var/www/teaching-stats/home/settings.py
     
     touch $MARK
   else
@@ -204,13 +216,8 @@ setup_gauth(){
   MARK="$DIR/setup-gauth.done"
   
   echo ""  
-  if ! [ -f "$MARK" ]; then        
-    
-    echo -e "${ORANGE}Please, provide an ${CYAN}IP address${ORANGE} if you want to override the default localhost (127.0.0.1), otherwise leave it in blank${ORANGE}:${NC}"
-    read HOST
-    if [ -z "$HOST" ]; then    
-      HOST="127.0.0.1"
-    fi
+  if ! [ -f "$MARK" ]; then            
+    host_req
 
     if [ -z "$EMAIL" ]; then    
       EMAIL="<your email>"
@@ -254,10 +261,7 @@ setup_gauth(){
     echo ""
     echo -e "${LCYAN}Setting up django's social account:${NC}"
     CURRENT=${PWD##*/}
-    
-    echo "Setting up the allowed hosts..."     
-    sed -i "s/'ALLOWED_HOSTS = ['\'localhost\'']'/''\'${HOST}\''/g" ${FILE}    #TODO: FIX THIS LINE
-
+        
     cd ${DIR}
     python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use '0.0.0.0:8000' when running within a container, in order to allow remote connections
     PID=$!  
