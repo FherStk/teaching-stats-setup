@@ -49,9 +49,15 @@ pip_req()
 {
   echo ""
   if [ $(pip3 list 2>/dev/null | grep -io -c "${1}") -eq 0 ];
-  then    
-    echo -e "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
-    pip3 install ${1}==${2};    
+  then        
+    if [ -f "$MARK" ]; then 
+      echo -e "${LCYAN}Installing requirements: ${CYAN}${1}${NC}"
+      pip3 install ${1};
+    else
+      echo -e "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
+      pip3 install ${1}==${2};    
+    fi
+    
   else 
     echo -e "${CYAN}Requirement ${LCYAN}${1}${CYAN} already satisfied, skipping...${NC}"
   fi
@@ -379,6 +385,7 @@ apt_req postgresql-contrib
 pip_req django 4.0.1
 pip_req django-allauth 0.47.0
 pip_req psycopg2-binary 2.9.3
+pip_req pytz
 
 bbdd_create
 bbdd_user
