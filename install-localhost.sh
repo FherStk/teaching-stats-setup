@@ -206,7 +206,7 @@ setup_gauth(){
     
     echo -e "${ORANGE}Please, provide an ${CYAN}IP address${ORANGE} if you want to override the default localhost (127.0.0.1), otherwise leave it in blank${ORANGE}:${NC}"
     read HOST
-    if [ -z "$IP" ]; then    
+    if [ -z "$HOST" ]; then    
       HOST="127.0.0.1"
     fi
 
