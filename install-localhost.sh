@@ -246,7 +246,7 @@ setup_gauth(){
     CURRENT=${PWD##*/}
     
     cd ${DIR}
-    python3 manage.py runserver  > /dev/null 2>&1 &    
+    python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use this when running within a container, in order to allow remote connections    
     PID=$!
 
     echo -e "    1. Visit the django's admin site ${CYAN}${URL}/admin${NC} and log in as superuser."
@@ -282,10 +282,7 @@ setup_site(){
     echo -e "${LCYAN}Setting up the site django data within ${CYAN}${FILE}${LCYAN}:${NC}"
     echo "Setting up the site secret key..." 
     SECRET=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
-    sed -i "s/'YOUR-SECRET-KEY'/'${SECRET}'/g" ${FILE}
-
-    echo "Setting up allowed hosts..."
-    sed -i "s/'YOUR-HOST'/'${DOMAIN},localhost'/g" ${FILE}
+    sed -i "s/'YOUR-SECRET-KEY'/'${SECRET}'/g" ${FILE}    
     
     ID=$(runuser -l postgres -c "psql -d \"${BBDD}\" -qtAX -c 'SELECT * FROM django_site WHERE name='\'${DOMAIN}:8000\'';'")    
     if ! [ -z "$ID" ]; then    
