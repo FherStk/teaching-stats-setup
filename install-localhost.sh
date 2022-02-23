@@ -13,13 +13,16 @@
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+ORANGE='\033[0;33m'
 CYAN='\033[0;36m'
 LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
 BBDD='teaching-stats'
 DIR="/var/www/${BBDD}"
-VERSION="0.0.2"
+VERSION="0.0.3"
 PASS=''
+EMAIL=''
+HOST=''
 
 abort()
 {
@@ -55,17 +58,27 @@ pip_req()
 
 pwd_req()
 {  
-  while true; do    
-    echo -e "Please, provide the password for the ${CYAN}${BBDD}${NC} ${1} :"
+  while true; do        
+    echo -e "${ORANGE}Please, provide the password for the ${CYAN}${BBDD}${ORANGE} ${1}:${NC}"
     read -s PASS
 
-    read -sp "Set the password (again): " PASS2
+    echo -e "${ORANGE}Set the password (again):${NC}"
+    read -s PASS2
     echo ""
 
     [ "$PASS" = "$PASS2" ] && break
     echo -e "${RED}Password missmatch, please try again.${NC}"
     echo ""
   done  
+}
+
+host_req()
+{  
+  echo -e "${ORANGE}Please, provide an ${CYAN}IP address${ORANGE} if you want to override the default localhost (127.0.0.1), otherwise leave it in blank${ORANGE}:${NC}"
+  read HOST
+  if [ -z "$HOST" ]; then    
+    HOST="127.0.0.1"
+  fi
 }
 
 bbdd_create()
@@ -122,42 +135,47 @@ copy_files()
 
 setup_files()
 {
-  MARK="$DIR/home/setup.done"
+  MARK="$DIR/setup-files.done"
   FILE="$DIR/home/settings.py"
 
   echo ""
   if ! [ -f "$MARK" ]; then    
-    echo -e "${LCYAN}Setting up the django file ${CYAN}${FILE}${LCYAN}:${NC}"
+    echo -e "${LCYAN}Setting up the initial django data within ${CYAN}${FILE}${LCYAN}:${NC}"
     echo "Setting up database name..."
     sed -i "s/'YOUR-DATABASE'/'${BBDD}'/g" ${FILE}
 
     echo "Setting up database user..."
     sed -i "s/'YOUR-USER'/'${BBDD}'/g" ${FILE}
 
-    if [ ${PASS} = ""];
-    then    
-      #if the bbdd already exists, the password must be provided
+    if [ -z "${PASS}"]; then    
       pwd_req "postgresql database user"              
     fi
     
-    echo "Setting up database password..."
-    sed -i "s/'YOUR-PASSWORD'/'${PASS}'/g" ${FILE}
+    if [ -z "$HOST" ]; then    
+      host_req
+    fi
 
     echo "Setting up database host..."
     sed -i "s/'YOUR-HOST'/'localhost'/g" ${FILE}
 
     echo "Setting up database port..."
-    sed -i "s/'YOUR-PORT'/'5432'/g" ${FILE}
-
+    sed -i "s/'YOUR-PORT'/'5432'/g" ${FILE}    
+    
+    echo "Setting up database password..."
+    sed -i "s/'YOUR-PASSWORD'/'${PASS}'/g" ${FILE}
+    
+    echo "Setting up the allowed hosts..."     
+    sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}'\]/g" /var/www/teaching-stats/home/settings.py
+    
     touch $MARK
   else
-    echo -e "${CYAN}Django file ${LCYAN}${FILE}${CYAN} setup already done, skipping...${NC}"
+    echo -e "${CYAN}Django file ${LCYAN}${FILE}${CYAN} setup for the initial data is already done, skipping...${NC}"
   fi
 }
 
 setup_django()
 {
-  MARK="$DIR/setup.done"
+  MARK="$DIR/setup-django.done"
 
   echo ""  
   if ! [ -f "$MARK" ]; then    
@@ -175,13 +193,12 @@ setup_django()
     
     echo ""    
     echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django superuser:${NC}"
-    if [ ${PASS} = ""];
-    then    
+    if [ -z "$PASS" ]; then    
       #if the bbdd already exists, the password must be provided
-    pwd_req "django superuser"
+      pwd_req "django superuser"
     fi
     
-    echo -e "Please, provide the email for the ${CYAN}${BBDD}${NC} django superuser:"
+    echo -e "${ORANGE}Please, provide the email for the ${CYAN}${BBDD}${ORANGE} django superuser:${NC}"
     read EMAIL          
     echo ""
 
@@ -192,6 +209,109 @@ setup_django()
     touch $MARK
   else
     echo -e "${CYAN}Django instance ${LCYAN}${FILE}${CYAN} setup already done, skipping...${NC}"
+  fi
+}
+
+setup_gauth(){
+  MARK="$DIR/setup-gauth.done"
+  
+  echo ""  
+  if ! [ -f "$MARK" ]; then          
+    if [ -z "$HOST" ]; then    
+      host_req
+    fi    
+
+    if [ -z "$EMAIL" ]; then    
+      EMAIL="<your email>"
+    fi
+
+    URL="http://${HOST}:8000"
+
+    echo -e "${LCYAN}Setting up Google Authentication:${NC}"
+    echo -e "    1. Visit the Google Developers Console at ${CYAN}https://console.developers.google.com/projectcreate${NC} and log in with your Google account."
+    echo -e "        1.1. Project name: ${CYAN}${BBDD}${NC}"
+    echo -e "        1.2. Leave the other fields with its default values."
+    echo -e "        1.3. Press the ${CYAN}create${NC} button."
+    echo ""
+    echo -e "    2. At the left panel, go to: ${CYAN}API and services -> OAuth consent screen${NC}"
+    echo -e "        2.1. User type: ${CYAN}external${NC}"
+    echo -e "        2.2. Press the ${CYAN}create${NC} button."
+    echo ""
+    echo -e "    3. Add the following app information:"
+    echo -e "        3.1. App name: ${CYAN}${BBDD}${NC}"
+    echo -e "        3.2. Support email: ${CYAN}${EMAIL}${NC}"
+    echo -e "        3.3. Developer contact information: ${CYAN}${EMAIL}${NC}"
+    echo -e "        3.4. Leave the other fields with its default values."
+    echo -e "        3.5. Press the ${CYAN}save and continue${NC} button."
+    echo -e "        3.6. Press the ${CYAN}save and continue${NC} button."
+    echo -e "        3.7. Press the ${CYAN}save and continue${NC} button."
+    echo -e "        3.8. Press the ${CYAN}return to panel${NC} button."
+    echo ""
+    echo -e "    4. At the left panel, go to: ${CYAN}API and services -> Credentials${NC}"
+    echo -e "        4.1. Press the ${CYAN}create credentials${NC} button."
+    echo -e "        4.2. Select the ${CYAN}OAuth client ID${NC} option."
+    echo -e "        4.3. Application type: ${CYAN}Web application${NC}"
+    echo -e "        4.4. Name: ${CYAN}${BBDD}${NC}"
+    echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}${URL}${NC}"
+    echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}${URL}/google/login/callback/${NC}"
+    echo -e "        4.7. Press the ${CYAN}create${NC} button."
+    echo -e "        4.8. Copy your ${CYAN}client id${NC} and ${CYAN}secret key${NC}, it will be required later."
+    echo ""
+    echo -e "Once completed the previous configuration, ${ORANGE}press any key to continue...${NC}"
+    read 
+
+    echo ""
+    echo -e "${LCYAN}Setting up django's social account:${NC}"
+    CURRENT=${PWD##*/}
+        
+    cd ${DIR}
+    python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use '0.0.0.0:8000' when running within a container, in order to allow remote connections
+    PID=$!  
+
+    echo -e "    1. Visit the django's admin site ${CYAN}${URL}/admin${NC} and log in as ${CYAN}${BBDD}${NC} superuser."
+    echo -e "    2. Go to Sites → Site → Add site. Set it up:"
+    echo -e "        Domain name: ${CYAN}${URL}${NC}"
+    echo -e "        Display name: ${CYAN}${URL}${NC}"
+    echo -e "    3. Go to Social accounts → Social applications → Add social application. Set it up:"
+    echo -e "        Provider: ${CYAN}Google${NC}"
+    echo -e "        Name: ${CYAN}google-api${NC}"
+    echo -e "        Client id: ${CYAN}<your client id>${NC}"
+    echo -e "        Secret key: ${CYAN}<your secret key>${NC}"
+    echo -e "        You can leave the ${CYAN}key${NC} field empty."
+    echo -e "    4. Add ${CYAN}${HOST}:8000${NC} to Chosen sites and save the new settings."
+    echo ""
+    echo -e "Once completed the previous configuration, ${ORANGE}press any key to continue...${NC}"
+    read 
+
+    kill $PID
+    cd $HOME/${CURRENT}
+    touch $MARK
+
+  else
+    echo -e "${CYAN}Google Authentication setup already done, skipping...${NC}"
+  fi
+}
+
+setup_site(){
+  MARK="$DIR/setup-site.done"
+  FILE="$DIR/home/settings.py"
+
+  echo ""  
+  if ! [ -f "$MARK" ]; then    
+    echo -e "${LCYAN}Setting up the site django data within ${CYAN}${FILE}${LCYAN}:${NC}"
+    echo "Setting up the site secret key..." 
+    SECRET=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
+    sed -i "s/'YOUR-SECRET-KEY'/'${SECRET}'/g" ${FILE}          
+
+    ID=$(runuser -l postgres -c "psql -d \"${BBDD}\" -qtAX -c 'SELECT * FROM django_site WHERE name='\'${HOST}:8000\'';'")    
+    if ! [ -z "$ID" ]; then    
+      echo "Setting up the site ID..."    
+      sed -i "s/'SITE_ID = 1'/'SITE_ID = ${ID}'/g" ${FILE}
+    fi
+
+    touch $MARK
+  else
+    echo -e "${CYAN}Django file ${LCYAN}${FILE}${CYAN} setup for the site data is already done, skipping...${NC}"
   fi
 }
 
@@ -230,6 +350,8 @@ bbdd_schema reports
 copy_files
 setup_files
 setup_django
+
+setup_gauth
 
 trap : 0
 echo ""
