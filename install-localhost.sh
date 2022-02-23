@@ -328,7 +328,7 @@ populate_master(){
     echo -e "    2. Review each master file and perform any modification you need."
     echo -e "    3. Each master file will be loaded and its data will be pupulated through the database."
     echo ""
-    echo -e "${ORANGE}Do you want to proceed loading the master data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC}[y/N]"
+    echo -e "${ORANGE}Do you want to proceed loading the master data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC} [y/N]"
     read CONTINUE
 
     if [ "$CONTINUE"="y" ]; then    
@@ -344,6 +344,8 @@ populate_master(){
       echo "[postgresql]\nhost=${HOST}\ndatabase=${BBDD}\nuser=${BBDD}\npassword=${PASS}\nport=${PSQL_PORT}\options=-c search_path=dbo,master" > ${FILE}
       python3 ${FOLDER}/insert_data.py
     fi
+
+    touch MARK
   else
     echo -e "${CYAN}Master data for the ${LCYAN}${BBDD}${CYAN} database already populated, skipping...${NC}"
   fi
