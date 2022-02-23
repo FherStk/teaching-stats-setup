@@ -246,7 +246,7 @@ setup_gauth(){
     CURRENT=${PWD##*/}
     
     cd ${DIR}
-    python3 manage.py runserver &    
+    python3 manage.py runserver  > /dev/null 2>&1 &    
     PID=$!
 
     echo -e "    1. Visit the django's admin site ${CYAN}${URL}/admin${NC} and log in as superuser."
