@@ -222,7 +222,8 @@ setup_gauth(){
     echo -e "    8. Copy your ${LCYAN}client id${NC} and ${LCYAN}secret key${NC}, it will be required later."
     echo ""
     echo "Once completed the previous configuration, press any key to continue..."
-    
+    read 
+
     echo ""
     echo -e "${LCYAN}Setting up django's social account ${ORANGE}(manual action needed)${NC}:"
     CURRENT=${PWD##*/}
@@ -244,6 +245,7 @@ setup_gauth(){
     echo -e "    4. Add ${LCYAN}${DOMAIN}:8000${NC} to Chosen sites and save the new settings."
     echo ""
     echo "Once completed the previous configuration, press any key to continue..."
+    read 
 
     kill $PID
     cd ${CURRENT}
