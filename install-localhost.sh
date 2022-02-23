@@ -147,13 +147,13 @@ setup_files()
     echo "Setting up database user..."
     sed -i "s/'YOUR-USER'/'${BBDD}'/g" ${FILE}
 
-    if [ ${PASS} = ""];
-    then    
-      #if the bbdd already exists, the password must be provided
+    if [ -z "${PASS}"]; then    
       pwd_req "postgresql database user"              
     fi
     
-    host_req
+    if [ -z "$HOST" ]; then    
+      host_req
+    fi
 
     echo "Setting up database host..."
     sed -i "s/'YOUR-HOST'/'localhost'/g" ${FILE}
@@ -216,8 +216,10 @@ setup_gauth(){
   MARK="$DIR/setup-gauth.done"
   
   echo ""  
-  if ! [ -f "$MARK" ]; then            
-    host_req
+  if ! [ -f "$MARK" ]; then          
+    if [ -z "$HOST" ]; then    
+      host_req
+    fi    
 
     if [ -z "$EMAIL" ]; then    
       EMAIL="<your email>"
