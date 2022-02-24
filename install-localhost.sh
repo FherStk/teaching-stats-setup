@@ -19,11 +19,13 @@ LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
 BBDD='teaching-stats'
 DIR="/var/www/${BBDD}"
+LOCALHOST="127.0.0.1" #Used for local connections like django -> postgres
 PSQL_PORT="5432"
 VERSION="0.0.4"
 PASS=''
 EMAIL=''
-HOST=''
+HOST='' #used to allow remote to local connections, useful when running within containers
+
 
 abort()
 {
@@ -80,15 +82,14 @@ pwd_req()
 }
 
 host_req()
-{  
-  LOCAL="127.0.0.1"
+{    
   IPv4=$(hostname -I | cut -d' ' -f1)
-  echo -e "${ORANGE}Do you like to use ${CYAN}${IPv4}${ORANGE} as the current host address? Otherwise ${CYAN}${LOCAL}${ORANGE} will be used${ORANGE}:${NC} [y/N]"
+  echo -e "${ORANGE}Do you like to use ${CYAN}${IPv4}${ORANGE} as the current host address? Otherwise ${CYAN}${LOCALHOST}${ORANGE} will be used${ORANGE}:${NC} [y/N]"
   read CONTINUE
   if [ "$CONTINUE"="y" ]; then    
     HOST=${IPv4}
   else
-    HOST=${LOCAL}
+    HOST=${LOCALHOST}
   fi
 }
 
@@ -341,11 +342,7 @@ populate_master(){
     echo -e "${ORANGE}Do you want to proceed loading the master data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC} [y/N]"
     read CONTINUE
 
-    if [ "$CONTINUE"="y" ]; then    
-      if [ -z "$HOST" ]; then    
-        host_req
-      fi
-
+    if [ "$CONTINUE"="y" ]; then         
       if [ -z "$PASS" ]; then    
         pwd_req "${BBDD} database user"
       fi
@@ -354,7 +351,7 @@ populate_master(){
       echo -e "${LCYAN}Setting up the ${CYAN}${FILE}${LCYAN} connection file:${NC}"    
       touch ${FILE}
       echo "[postgresql]" >> ${FILE}
-      echo "host=${HOST}" >> ${FILE}
+      echo "host=${LOCALHOST}" >> ${FILE}
       echo "database=${BBDD}" >> ${FILE}
       echo "user=${BBDD}" >> ${FILE}
       echo "password=${PASS}" >> ${FILE}
@@ -367,7 +364,6 @@ populate_master(){
       cd ${FOLDER}      
       python3 insert_data.py
       cd ..
-      echo "Database population completed."
     fi
 
     touch MARK
