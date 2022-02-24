@@ -106,9 +106,21 @@ bbdd_create()
 
 bbdd_root(){
   USER=$(whoami)
-  #TODO: check for the user, if does not exists, create as superuser with no pwd 
-  #Get the current psql version in order to get the folder with the current pg_hba
-  #Add an entry into the pg_hba to allow the current user use psql with no login
+  echo ""
+  if [ $(runuser -l postgres -c "psql -c \"\\du ${USER}\" | cut -d \| -f 1 | grep -c ${USER}") -eq 0 ];
+  then    
+    echo -e "${LCYAN}Creating the ${CYAN}${USER}${LCYAN} database superuser:${NC}"    
+    runuser -l postgres -c "psql -e -c 'CREATE USER \"${USER}\" SUPERUSER;'"
+            
+    PGHBA=$(runuser -l postgres -c "psql -t -P format=unaligned -c 'show hba_file';")
+    echo -e "${LCYAN}Adding the ${CYAN}${USER}${LCYAN} login entry to the ${CYAN}${PGHBA}${LCYAN} file:${NC}"
+    echo "local   ${BBDD}             ${USER}                                peer" > ${PGHBA}
+
+    echo -e "${LCYAN}Restarting the ${CYAN}PostgreSQL${LCYAN} database service:${NC}"    
+    service postgresql restart
+  else
+    echo -e "${CYAN}The database superuser ${LCYAN}${USER}${CYAN} already exists, skipping...${NC}"
+  fi
 }
 
 bbdd_user(){
@@ -397,7 +409,6 @@ pip_req django-allauth 0.47.0
 pip_req psycopg2-binary 2.9.3
 pip_req pytz
 
-bbdd_root
 bbdd_create
 bbdd_user
 
@@ -410,6 +421,7 @@ setup_files
 setup_django
 setup_gauth
 
+bbdd_root
 populate_master
 
 trap : 0
