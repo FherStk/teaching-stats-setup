@@ -161,11 +161,7 @@ setup_files()
 
     if [ -z "$PASS"]; then    
       pwd_req "postgresql database user"              
-    fi
-    
-    if [ -z "$HOST" ]; then    
-      host_req
-    fi
+    fi     
 
     echo "Setting up database host..."
     sed -i "s/'YOUR-HOST'/'localhost'/g" ${FILE}
@@ -175,8 +171,11 @@ setup_files()
     
     echo "Setting up database password..."
     sed -i "s/'YOUR-PASSWORD'/'${PASS}'/g" ${FILE}
-    
+        
     echo "Setting up the allowed hosts..."     
+    if [ -z "$HOST" ]; then    
+      host_req
+    fi
     sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}'\]/g" /var/www/teaching-stats/home/settings.py
     
     touch $MARK
@@ -228,18 +227,19 @@ setup_gauth(){
   MARK="$DIR/setup-gauth.done"
   
   echo ""  
-  if ! [ -f "$MARK" ]; then          
+  if ! [ -f "$MARK" ]; then             
+    URL="http://${HOST}:8000"
+
+    echo -e "${LCYAN}Setting up Google Authentication:${NC}"
     if [ -z "$HOST" ]; then    
       host_req
+      echo ""
     fi    
 
     if [ -z "$EMAIL" ]; then    
       EMAIL="<your email>"
     fi
 
-    URL="http://${HOST}:8000"
-
-    echo -e "${LCYAN}Setting up Google Authentication:${NC}"
     echo -e "    1. Visit the Google Developers Console at ${CYAN}https://console.developers.google.com/projectcreate${NC} and log in with your Google account."
     echo -e "        1.1. Project name: ${CYAN}${BBDD}${NC}"
     echo -e "        1.2. Leave the other fields with its default values."
