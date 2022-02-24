@@ -104,29 +104,6 @@ bbdd_create()
   fi
 }
 
-bbdd_root(){
-  USER=$(whoami)
-  echo ""
-  if [ $(runuser -l postgres -c "psql -c \"\\du ${USER}\" | cut -d \| -f 1 | grep -c ${USER}") -eq 0 ];
-  then    
-    echo -e "${LCYAN}Creating the ${CYAN}${USER}${LCYAN} database superuser:${NC}"    
-    runuser -l postgres -c "psql -e -c 'CREATE USER \"${USER}\" SUPERUSER;'"
-            
-    PGHBA=$(runuser -l postgres -c "psql -t -P format=unaligned -c 'show hba_file';")
-    echo ""
-    echo -e "${LCYAN}Adding the ${CYAN}${USER}${LCYAN} login entry to the ${CYAN}${PGHBA}${LCYAN} file:${NC}"
-    echo "local   ${BBDD}             ${USER}                                peer" >> ${PGHBA}
-    echo "Login entry succesfully added."
-
-    echo ""
-    echo -e "${LCYAN}Restarting the ${CYAN}PostgreSQL${LCYAN} database service:${NC}"    
-    service postgresql restart
-    echo "Service successfuly restarted."
-  else
-    echo -e "${CYAN}The database superuser ${LCYAN}${USER}${CYAN} already exists, skipping...${NC}"
-  fi
-}
-
 bbdd_user(){
   echo ""
   if [ $(runuser -l postgres -c "psql -c \"\\du ${BBDD}\" | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
@@ -373,12 +350,24 @@ populate_master(){
         pwd_req "${BBDD} database user"
       fi
 
+      echo ""  
+      echo -e "${LCYAN}Setting up the ${CYAN}${FILE}${LCYAN} connection file:${NC}"    
       touch ${FILE}
-      echo "[postgresql]\nhost=${HOST}\ndatabase=${BBDD}\nuser=${BBDD}\npassword=${PASS}\nport=${PSQL_PORT}\options=-c search_path=dbo,master" > ${FILE}
+      echo "[postgresql]" >> ${FILE}
+      echo "host=${HOST}" >> ${FILE}
+      echo "database=${BBDD}" >> ${FILE}
+      echo "user=${BBDD}" >> ${FILE}
+      echo "password=${PASS}" >> ${FILE}
+      echo "port=${PSQL_PORT}" >> ${FILE}
+      echo "options=-c search_path=dbo,master" >> ${FILE}
+      echo "File successfully created."
 
+      echo ""  
+      echo -e "${LCYAN}Starting the ${CYAN}${BBDD}${LCYAN} database population:${NC}"    
       cd ${FOLDER}      
-      python3 insert_data.py #TODO: root user for postgres must be created first.
+      python3 insert_data.py
       cd ..
+      echo "Database population completed."
     fi
 
     touch MARK
@@ -425,7 +414,6 @@ setup_files
 setup_django
 setup_gauth
 
-bbdd_root
 populate_master
 
 trap : 0
