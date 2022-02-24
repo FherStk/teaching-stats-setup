@@ -159,7 +159,7 @@ setup_files()
     echo "Setting up database user..."
     sed -i "s/'YOUR-USER'/'${BBDD}'/g" ${FILE}
 
-    if [ -z "${PASS}"]; then    
+    if [ -z "$PASS"]; then    
       pwd_req "postgresql database user"              
     fi
     
