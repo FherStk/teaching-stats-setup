@@ -19,10 +19,13 @@ LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
 BBDD='teaching-stats'
 DIR="/var/www/${BBDD}"
-VERSION="0.0.3"
+LOCALHOST="127.0.0.1" #Used for local connections like django -> postgres
+PSQL_PORT="5432"
+VERSION="0.0.4"
 PASS=''
 EMAIL=''
-HOST=''
+HOST='' #used to allow remote to local connections, useful when running within containers
+
 
 abort()
 {
@@ -48,9 +51,15 @@ pip_req()
 {
   echo ""
   if [ $(pip3 list 2>/dev/null | grep -io -c "${1}") -eq 0 ];
-  then    
-    echo -e "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
-    pip3 install ${1}==${2};    
+  then        
+    if [ -f "$MARK" ]; then 
+      echo -e "${LCYAN}Installing requirements: ${CYAN}${1} v${2}${NC}"
+      pip3 install ${1}==${2};    
+    else
+      echo -e "${LCYAN}Installing requirements: ${CYAN}${1}${NC}"
+      pip3 install ${1};      
+    fi
+    
   else 
     echo -e "${CYAN}Requirement ${LCYAN}${1}${CYAN} already satisfied, skipping...${NC}"
   fi
@@ -73,11 +82,14 @@ pwd_req()
 }
 
 host_req()
-{  
-  echo -e "${ORANGE}Please, provide an ${CYAN}IP address${ORANGE} if you want to override the default localhost (127.0.0.1), otherwise leave it in blank${ORANGE}:${NC}"
-  read HOST
-  if [ -z "$HOST" ]; then    
-    HOST="127.0.0.1"
+{    
+  IPv4=$(hostname -I | cut -d' ' -f1)
+  echo -e "${ORANGE}Do you like to use ${CYAN}${IPv4}${ORANGE} as the current host address? Otherwise ${CYAN}${LOCALHOST}${ORANGE} will be used${ORANGE}:${NC} [y/N]"
+  read CONTINUE
+  if [ "$CONTINUE"="y" ]; then    
+    HOST=${IPv4}
+  else
+    HOST=${LOCALHOST}
   fi
 }
 
@@ -147,24 +159,23 @@ setup_files()
     echo "Setting up database user..."
     sed -i "s/'YOUR-USER'/'${BBDD}'/g" ${FILE}
 
-    if [ -z "${PASS}"]; then    
+    if [ -z "$PASS"]; then    
       pwd_req "postgresql database user"              
-    fi
-    
-    if [ -z "$HOST" ]; then    
-      host_req
-    fi
+    fi     
 
     echo "Setting up database host..."
     sed -i "s/'YOUR-HOST'/'localhost'/g" ${FILE}
 
     echo "Setting up database port..."
-    sed -i "s/'YOUR-PORT'/'5432'/g" ${FILE}    
+    sed -i "s/'YOUR-PORT'/'${PSQL_PORT}'/g" ${FILE}    
     
     echo "Setting up database password..."
     sed -i "s/'YOUR-PASSWORD'/'${PASS}'/g" ${FILE}
-    
+        
     echo "Setting up the allowed hosts..."     
+    if [ -z "$HOST" ]; then    
+      host_req
+    fi
     sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}'\]/g" /var/www/teaching-stats/home/settings.py
     
     touch $MARK
@@ -216,18 +227,19 @@ setup_gauth(){
   MARK="$DIR/setup-gauth.done"
   
   echo ""  
-  if ! [ -f "$MARK" ]; then          
+  if ! [ -f "$MARK" ]; then             
+    URL="http://${HOST}:8000"
+
+    echo -e "${LCYAN}Setting up Google Authentication:${NC}"
     if [ -z "$HOST" ]; then    
       host_req
+      echo ""
     fi    
 
     if [ -z "$EMAIL" ]; then    
       EMAIL="<your email>"
     fi
 
-    URL="http://${HOST}:8000"
-
-    echo -e "${LCYAN}Setting up Google Authentication:${NC}"
     echo -e "    1. Visit the Google Developers Console at ${CYAN}https://console.developers.google.com/projectcreate${NC} and log in with your Google account."
     echo -e "        1.1. Project name: ${CYAN}${BBDD}${NC}"
     echo -e "        1.2. Leave the other fields with its default values."
@@ -315,6 +327,51 @@ setup_site(){
   fi
 }
 
+populate(){
+  MARK="$DIR/populate-$1.done"
+  FOLDER="$2"
+  FILE=${FOLDER}/database.ini
+
+  echo ""  
+  if ! [ -f "$MARK" ]; then        
+    echo -e "${LCYAN}Populating $1 data within the ${CYAN}${BBDD}${LCYAN} database:${NC}"    
+    echo -e "    1. Go to the ${CYAN}${FOLDER}${NC} folder."
+    echo -e "    2. Review each $1 file and perform any modification you need."
+    echo -e "    3. Each $1 file will be loaded and its data will be pupulated through the database."
+    echo ""
+    echo -e "${ORANGE}Do you want to proceed loading the ${CYAN}$1${ORANGE} data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC} [y/N]"
+    read CONTINUE
+
+    if [ "$CONTINUE"="y" ]; then         
+      if [ -z "$PASS" ]; then    
+        pwd_req "${BBDD} database user"
+      fi
+
+      echo ""  
+      echo -e "${LCYAN}Setting up the ${CYAN}${FILE}${LCYAN} connection file:${NC}"    
+      touch ${FILE}
+      echo "[postgresql]" >> ${FILE}
+      echo "host=${LOCALHOST}" >> ${FILE}
+      echo "database=${BBDD}" >> ${FILE}
+      echo "user=${BBDD}" >> ${FILE}
+      echo "password=${PASS}" >> ${FILE}
+      echo "port=${PSQL_PORT}" >> ${FILE}
+      echo "options=-c search_path=dbo,master" >> ${FILE}
+      echo "File successfully created."
+
+      echo ""  
+      echo -e "${LCYAN}Starting the ${CYAN}${BBDD}${LCYAN} database population for $1 data:${NC}"    
+      cd ${FOLDER}      
+      python3 $3
+      cd ..
+    fi
+
+    touch MARK
+  else
+    echo -e "${CYAN}The ${LCYAN}$1${CYAN} data for the ${LCYAN}${BBDD}${CYAN} database already populated, skipping...${NC}"
+  fi
+}
+
 trap 'abort' 0
 set -e
 
@@ -339,6 +396,7 @@ apt_req postgresql-contrib
 pip_req django 4.0.1
 pip_req django-allauth 0.47.0
 pip_req psycopg2-binary 2.9.3
+pip_req pytz
 
 bbdd_create
 bbdd_user
@@ -350,8 +408,10 @@ bbdd_schema reports
 copy_files
 setup_files
 setup_django
-
 setup_gauth
+
+populate master teaching-stats-db-population insert_data.py
+populate students teaching-stats-import-students insert_students.py
 
 trap : 0
 echo ""
