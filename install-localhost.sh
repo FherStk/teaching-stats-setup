@@ -339,7 +339,7 @@ populate(){
     echo -e "    2. Review each $1 file and perform any modification you need."
     echo -e "    3. Each $1 file will be loaded and its data will be pupulated through the database."
     echo ""
-    echo -e "${ORANGE}Do you want to proceed loading the $1 data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC} [y/N]"
+    echo -e "${ORANGE}Do you want to proceed loading the ${CYAN}$1${ORANGE} data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC} [y/N]"
     read CONTINUE
 
     if [ "$CONTINUE"="y" ]; then         
@@ -368,7 +368,7 @@ populate(){
 
     touch MARK
   else
-    echo -e "${CYAN}Master data for the ${LCYAN}${BBDD}${CYAN} database already populated, skipping...${NC}"
+    echo -e "${CYAN}The ${LCYAN}$1${CYAN} data for the ${LCYAN}${BBDD}${CYAN} database already populated, skipping...${NC}"
   fi
 }
 
