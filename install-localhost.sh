@@ -327,19 +327,19 @@ setup_site(){
   fi
 }
 
-populate_master(){
-  MARK="$DIR/populate-master.done"
-  FOLDER="teaching-stats-db-population"
+populate(){
+  MARK="$DIR/populate-$1.done"
+  FOLDER="$2"
   FILE=${FOLDER}/database.ini
 
   echo ""  
   if ! [ -f "$MARK" ]; then        
-    echo -e "${LCYAN}Populating demo master data within the ${CYAN}${BBDD}${LCYAN} database:${NC}"    
+    echo -e "${LCYAN}Populating $1 data within the ${CYAN}${BBDD}${LCYAN} database:${NC}"    
     echo -e "    1. Go to the ${CYAN}${FOLDER}${NC} folder."
-    echo -e "    2. Review each master file and perform any modification you need."
-    echo -e "    3. Each master file will be loaded and its data will be pupulated through the database."
+    echo -e "    2. Review each $1 file and perform any modification you need."
+    echo -e "    3. Each $1 file will be loaded and its data will be pupulated through the database."
     echo ""
-    echo -e "${ORANGE}Do you want to proceed loading the master data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC} [y/N]"
+    echo -e "${ORANGE}Do you want to proceed loading the $1 data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC} [y/N]"
     read CONTINUE
 
     if [ "$CONTINUE"="y" ]; then         
@@ -360,9 +360,9 @@ populate_master(){
       echo "File successfully created."
 
       echo ""  
-      echo -e "${LCYAN}Starting the ${CYAN}${BBDD}${LCYAN} database population:${NC}"    
+      echo -e "${LCYAN}Starting the ${CYAN}${BBDD}${LCYAN} database population for $1 data:${NC}"    
       cd ${FOLDER}      
-      python3 insert_data.py
+      python3 $3
       cd ..
     fi
 
@@ -410,7 +410,8 @@ setup_files
 setup_django
 setup_gauth
 
-populate_master
+populate master teaching-stats-db-population insert_data.py
+populate students teaching-stats-import-students insert_students.py
 
 trap : 0
 echo ""
