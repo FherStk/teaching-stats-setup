@@ -20,11 +20,11 @@ echo ""
 IPv4=$(hostname -I | cut -d' ' -f1)
 
 echo 
-echo "${CYAN}You can access to the survey system through:${NC}"
+echo -e "${CYAN}You can access to the survey system through:${NC}"
 echo "    http://${IPv4}:8000/"
 echo "    http://127.0.0.1:8000/"
 echo 
-echo "${CYAN}You can access to the survey stats through:${NC}"
+echo -e "${CYAN}You can access to the survey stats through:${NC}"
 echo "    http://${IPv4}:8000/resultats"
 echo "    http://127.0.0.1:8000/resultats"
 echo 
