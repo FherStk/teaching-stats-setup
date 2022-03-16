@@ -3,10 +3,6 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 PATH="/var/www/teaching-stats"
 
-if [ -d "$HOME/bin" ] ; then
-    PATH="$HOME/bin:$PATH"
-fi
-
 abort()
 {
   #Source: https://stackoverflow.com/a/22224317    
@@ -18,7 +14,7 @@ abort()
 trap 'abort' 0
 set -e
 
-bash ./info.sh "Starting application..."
+/bin/bash ./info.sh "Starting application..."
 echo ""
 
 cd ${PATH}
@@ -29,7 +25,7 @@ PID=$!
 /bin/touch teaching-stats.pid
 echo ${PID} > teaching-stats.pid
 
-IPv4=$(hostname -I | cut -d' ' -f1)
+IPv4=$(/bin/hostname -I | /bin/cut -d' ' -f1)
 
 echo 
 echo "You can access to the survey system through:"

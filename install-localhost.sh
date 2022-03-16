@@ -364,6 +364,8 @@ populate(){
       cd ${FOLDER}      
       python3 $3
       cd ..
+    else
+      echo "Skipping..."  
     fi
 
     touch MARK
