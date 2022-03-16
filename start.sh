@@ -14,7 +14,7 @@ abort()
 trap 'abort' 0
 set -e
 
-sh ./info.sh "Starting application..."
+/bin/sh ./info.sh "Starting application..."
 
 cd ${PATH}
 python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use '0.0.0.0:8000' when running within a container, in order to allow remote connections

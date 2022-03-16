@@ -27,7 +27,7 @@ FILE="${PATH}/social_app/urls.py"
 MODE=${1}
 OPTION=${2}
 
-sh ./info.sh "Config"
+/bin/sh ./info.sh "Config"
 
 if [ "$MODE"="survey" ]; then    
     if [ "$OPTION"="open" ]; then    
