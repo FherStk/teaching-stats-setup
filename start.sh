@@ -16,6 +16,17 @@ set -e
 bash ./info.sh "Starting application..."
 echo ""
 
+IPv4=$(hostname -I | cut -d' ' -f1)
+
+echo 
+echo "You can access to the survey system through:"
+echo "    http://${IPv4}:8000/"
+echo "    http://127.0.0.1:8000/"
+echo 
+echo "You can access to the survey stats through:"
+echo "    http://${IPv4}:8000/resultats"
+echo "    http://127.0.0.1:8000/resultats"
+
 cd /var/www/teaching-stats
 python3 manage.py runserver 0.0.0.0:8000
 # CURRENT=${PWD##*/}
