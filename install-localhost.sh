@@ -105,7 +105,8 @@ bbdd_create()
   fi
 }
 
-bbdd_user(){
+bbdd_user()
+{
   echo ""
   if [ $(runuser -l postgres -c "psql -c \"\\du ${BBDD}\" | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
   then    
@@ -120,7 +121,8 @@ bbdd_user(){
   fi
 }
 
-bbdd_schema(){
+bbdd_schema()
+{
   echo ""
   if [ $(runuser -l postgres -c "psql -d \"${BBDD}\" -e -c \"SELECT schema_name FROM information_schema.schemata;\" | cut -d \| -f 1 | grep -c ${1}") -eq 0 ];
   then    
@@ -176,8 +178,8 @@ setup_files()
     if [ -z "$HOST" ]; then    
       host_req
     fi
-    sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}'\]/g" /var/www/teaching-stats/home/settings.py
-    
+    sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}'\]/g" /var/www/teaching-stats/home/settings.py      
+
     touch $MARK
   else
     echo -e "${CYAN}Django file ${LCYAN}${FILE}${CYAN} setup for the initial data is already done, skipping...${NC}"
@@ -223,7 +225,8 @@ setup_django()
   fi
 }
 
-setup_gauth(){
+setup_gauth()
+{
   MARK="$DIR/setup-gauth.done"
   
   echo ""  
@@ -304,7 +307,8 @@ setup_gauth(){
   fi
 }
 
-setup_site(){
+setup_site()
+{
   MARK="$DIR/setup-site.done"
   FILE="$DIR/home/settings.py"
 
@@ -327,7 +331,8 @@ setup_site(){
   fi
 }
 
-populate(){
+populate()
+{
   MARK="$DIR/populate-$1.done"
   FOLDER="$2"
   FILE=${FOLDER}/database.ini
@@ -374,6 +379,68 @@ populate(){
   fi
 }
 
+metabase(){
+  MARK="$DIR/setup-metabase.done"
+  USER="metabase"
+  FOLDER="/opt/${USER}"
+
+  echo ""  
+  if ! [ -f "$MARK" ]; then          
+    if [ $(getent group ${USER}) ]; then
+      echo -e "${CYAN}Group ${LCYAN}${USER}${CYAN} already exists, skipping...${NC}"
+    else
+      echo -e "${LCYAN}Creating the ${CYAN}${USER}${LCYAN} group:${NC}"
+      sudo addgroup --quiet --system ${USER}
+    fi
+    echo
+
+    if id "$USER" &>/dev/null; then
+      echo -e "${CYAN}User ${LCYAN}${USER}${CYAN} already exists, skipping...${NC}"
+    else
+      echo -e "${LCYAN}Creating the ${CYAN}${USER}${LCYAN} user:${NC}"
+      sudo adduser --quiet --system --ingroup ${USER} --no-create-home --disabled-password ${USER}
+    fi
+    echo
+
+    echo -e "${LCYAN}Creating the ${CYAN}${USER}${LCYAN} directory:${NC}"
+    mkdir -p ${FOLDER}
+    sudo chown -R ${USER}:${USER} ${FOLDER}
+    echo
+
+    FILE_ENV="/etc/default/${USER}"
+    echo -e "${LCYAN}Setting up the ${CYAN}${USER}${LCYAN} enviroment:${NC}"
+    touch ${FILE_ENV}
+    sudo chmod 640 ${FILE_ENV}
+
+    FILE_LOG="/var/log/${USER}.log"
+    echo -e "${LCYAN}Setting up the ${CYAN}${USER}${LCYAN} log files:${NC}"
+    touch ${FILE_LOG}
+    sudo chown ${USER}:${USER} ${FILE_LOG}
+
+    FILE_CON="/etc/rsyslog.d/${USER}.conf"
+    echo -e "${LCYAN}Setting up the ${CYAN}${USER}${LCYAN} config files:${NC}"
+    touch ${FILE_CON}
+    echo ":msg,contains,\"metabase\" ${FILE_LOG} & stop" >> ${FILE_CON}
+
+    FILE_CON="/etc/rsyslog.conf"
+    echo -e "${ORANGE}Is this instance running within an ${CYAN}LXD${ORANGE} container or similar?${NC} [y/N]"
+    read CONTINUE
+    if [ "$CONTINUE"="y" ]; then    
+      sed -i "s/module(load=\"imklog\"/#module(load=\"imklog\"/g" ${FILE_CON}
+    else
+      sed -i "s/#module(load=\"imklog\"/module(load=\"imklog\"/g" ${FILE_CON}
+    fi
+
+    echo -e "${LCYAN}Restarting the ${CYAN}rsyslog${LCYAN} service:${NC}"
+    systemctl restart rsyslog
+
+    touch MARK
+  else
+    echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} setup is already done, skipping...${NC}"
+  fi
+
+}
+
 trap 'abort' 0
 set -e
 
@@ -390,6 +457,7 @@ apt_req python-dev-is-python2
 apt_req python3-pip
 apt_req postgresql
 apt_req postgresql-contrib
+apt_req default-jre
 
 pip_req django 4.0.1
 pip_req django-allauth 0.47.0
@@ -410,6 +478,8 @@ setup_gauth
 
 populate master teaching-stats-db-population insert_data.py
 populate students teaching-stats-import-students insert_students.py
+
+metabase
 
 trap : 0
 echo ""
