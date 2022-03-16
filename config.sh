@@ -46,6 +46,5 @@ else
     options
 fi
 
-
 trap : 0
 echo ""
