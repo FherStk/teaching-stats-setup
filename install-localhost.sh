@@ -112,12 +112,12 @@ host_req()
 bbdd_create()
 {
   echo ""
-  if [ $(runuser -l postgres -c "psql -lqt | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
+  if [ $(runuser -l postgres -c "psql -lqt | cut -d \| -f 1 | grep -c $1") -eq 0 ];
   then    
-    echo -e "${LCYAN}Creating the ${CYAN}${BBDD}${LCYAN} database:${NC}"
-    runuser -l postgres -c "createdb -e ${BBDD}"
+    echo -e "${LCYAN}Creating the ${CYAN}$1${LCYAN} database:${NC}"
+    runuser -l postgres -c "createdb -e $1"
   else
-    echo -e "${CYAN}The database ${LCYAN}${BBDD}${CYAN} already exists, skipping...${NC}"
+    echo -e "${CYAN}The database ${LCYAN}$1${CYAN} already exists, skipping...${NC}"
   fi
 }
 
@@ -456,7 +456,100 @@ metabase_env()
   else
     echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} environment is already setup, skipping...${NC}"
   fi
+}
 
+metabase_download()
+{
+  MARK="$DIR/metabase-download.done"  
+
+  echo ""  
+  if ! [ -f "$MARK" ]; then      
+    echo -e "${CYAN}Downloading the lastest ${LCYAN}${USER}${CYAN} app version:${NC}"
+    wget https://www.metabase.com/start/oss/jar.html -O /opt/metabase/metabase.jar
+
+    touch $MARK
+  else
+    echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} app is already downloaded, skipping...${NC}"
+  fi
+}
+
+metabase_setup()
+{
+  MARK="$DIR/metabase-setup.done"
+  USER="metabase"
+  FILE="/opt/metabase/metabase-postgres.sh"
+
+  echo ""  
+  if ! [ -f "$MARK" ]; then      
+    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"
+    touch $FILE
+    
+    if [ -z "$PASS" ]; then    
+      pwd_req "${BBDD} database user"
+    fi
+
+    echo "#!/bin/bash" >> ${FILE}
+    echo "cd /opt/metabase" >> ${FILE}
+    echo "EXPORT MB_DB_TYPE=postgres" >> ${FILE}
+    echo "EXPORT MB_DB_DBNAME=${BBDD}-metabase" >> ${FILE}
+    echo "EXPORT MB_DB_PORT=5432" >> ${FILE}
+    echo "EXPORT MB_DB_USER=${BBDD}" >> ${FILE}
+    echo "EXPORT MB_DB_PASS=${PASS}" >> ${FILE}
+    echo "EXPORT MB_DB_HOST=127.0.0.1" >> ${FILE}
+    echo "/usr/bin/java -jar metabase.java" >> ${FILE}
+
+    chmod +x $FILE
+
+    touch $MARK
+  else
+    echo -e "${CYAN}The metabase ${LCYAN}${USER}${CYAN} instance is already setup, skipping...${NC}"
+  fi
+}
+
+metabase_service()
+{
+  MARK="$DIR/metabase-service.done"
+  USER="metabase"
+  FILE="/etc/systemd/system/metabase.service"
+
+  echo ""  
+  if ! [ -f "$MARK" ]; then      
+    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} service:${NC}"    
+
+    echo -e "   Creating the service file for the current ${LCYAN}${USER}${NC} instance..."
+    touch $FILE
+    echo "[Unit]" >> ${FILE}
+    echo "Description=Metabase Server" >> ${FILE}
+    echo "After=syslog.target" >> ${FILE}
+    echo "After=network.target" >> ${FILE}
+    echo "" >> ${FILE}
+    echo "[Service]" >> ${FILE}
+    echo "WorkingDirectory=/opt/metabase" >> ${FILE}
+    echo "ExecStart=/usr/bin/bash /opt/metabase/metabase-postgres.sh" >> ${FILE}
+    echo "EnvironmentFile=/etc/default/metabase" >> ${FILE}
+    echo "User=metabase" >> ${FILE}
+    echo "Type=simple" >> ${FILE}
+    echo "StandardOutput=syslog" >> ${FILE}
+    echo "StandardError=syslog" >> ${FILE}
+    echo "SyslogIdentifier=metabase" >> ${FILE}
+    echo "SuccessExitStatus=143" >> ${FILE}
+    echo "TimeoutStopSec=120" >> ${FILE}
+    echo "Restart=always" >> ${FILE}
+    echo "" >> ${FILE}
+    echo "[Install]" >> ${FILE} 
+    echo "WantedBy=multi-user.target" >> ${FILE}
+
+    echo -e "   Reloading the systemd daemon..."
+    sudo systemctl daemon-reload 
+
+    echo -e "   Starting the ${LCYAN}${USER}${NC} service..."
+    sudo systemctl enable metabase.service
+    sudo systemctl start metabase.service
+
+    touch $MARK
+  else
+    echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} service already exists, skipping...${NC}"
+  fi
 }
 
 trap 'abort' 0
@@ -482,7 +575,7 @@ pip_req django-allauth 0.47.0
 pip_req psycopg2-binary 2.9.3
 pip_req pytz
 
-bbdd_create
+bbdd_create $BBDD
 bbdd_user
 
 bbdd_schema public
@@ -498,6 +591,10 @@ populate master teaching-stats-db-population insert_data.py
 populate students teaching-stats-import-students insert_students.py
 
 metabase_env
+metabase_download
+bbdd_create "${BBDD}-metabase"
+metabase_setup
+metabase_service
 
 trap : 0
 echo ""
