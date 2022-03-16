@@ -340,12 +340,9 @@ populate(){
     echo -e "    3. Each $1 file will be loaded and its data will be pupulated through the database."
     echo ""
     echo -e "${ORANGE}Do you want to proceed loading the ${CYAN}$1${ORANGE} data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC} [y/N]"
-    read CONTINUE
+    read CONTINUE    
 
-    echo ${CONTINUE}
-    echo ${CONTINUE}
-
-    if [ "$CONTINUE"=="y" ]; then         
+    if [ "$CONTINUE" == "y" ]; then
       if [ -z "$PASS" ]; then    
         pwd_req "${BBDD} database user"
       fi
