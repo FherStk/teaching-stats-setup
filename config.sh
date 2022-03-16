@@ -1,5 +1,6 @@
 #!/bin/bash
 RED='\033[0;31m'
+GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
 abort()
@@ -30,11 +31,12 @@ bash ./info.sh "Config"
 
 if [ "$MODE" == "survey" ]; then
     if [ "$OPTION" == "open" ]; then    
-        mv -f resources/urls-open.py ${FILE}        
-        echo "Survey seasson is currently open."
+        mv -f resources/urls-open.py ${FILE}   
+        echo     
+        echo -e "${GREEN}Survey seasson is currently open.${NC}"
     elif [ "$OPTION" == "close" ]; then    
         mv -f resources/urls-closed.py ${FILE}
-        echo "Survey seasson is currently closed."
+        echo -e "${RED}Survey seasson is currently closed.${NC}"
     else
         options
     fi
