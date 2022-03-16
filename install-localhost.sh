@@ -343,7 +343,8 @@ populate(){
     read CONTINUE
 
     echo ${CONTINUE}
-    
+    echo ${CONTINUE}
+
     if [ "$CONTINUE"=="y" ]; then         
       if [ -z "$PASS" ]; then    
         pwd_req "${BBDD} database user"
