@@ -28,13 +28,13 @@ OPTION=${2}
 
 bash ./info.sh "Config"
 
-if [ "$MODE"="survey" ]; then    
-    if [ "$OPTION"="open" ]; then    
+if [ "$MODE" == "survey" ]; then
+    if [ "$OPTION" == "open" ]; then    
         sed -i "s/#path('', TemplateView.as_view(template_name=\"social_app/index.html\"), name='homepage'),/path('', TemplateView.as_view(template_name=\"social_app/index.html\"), name='homepage')/g" ${FILE}
         sed -i "s/path('', TemplateView.as_view(template_name=\"social_app/survey_closed.html\"), name='homepage'),/#path('', TemplateView.as_view(template_name=\"social_app/survey_closed.html\"), name='homepage')/g" ${FILE}
         
         echo "Survey seasson is currently open."
-    elif [ "$OPTION"="close" ]; then    
+    elif [ "$OPTION" == "close" ]; then    
         sed -i "s/path('', TemplateView.as_view(template_name=\"social_app/index.html\"), name='homepage'),/#path('', TemplateView.as_view(template_name=\"social_app/index.html\"), name='homepage')/g" ${FILE}
         sed -i "s/#path('', TemplateView.as_view(template_name=\"social_app/survey_closed.html\"), name='homepage'),/path('', TemplateView.as_view(template_name=\"social_app/survey_closed.html\"), name='homepage')/g" ${FILE}
         
