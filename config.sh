@@ -30,14 +30,10 @@ bash ./info.sh "Config"
 
 if [ "$MODE" == "survey" ]; then
     if [ "$OPTION" == "open" ]; then    
-        sed -i "s/#path('', TemplateView.as_view(template_name=\"social_app/index.html\"), name='homepage'),/path('', TemplateView.as_view(template_name=\"social_app/index.html\"), name='homepage')/g" ${FILE}
-        sed -i "s/path('', TemplateView.as_view(template_name=\"social_app/survey_closed.html\"), name='homepage'),/#path('', TemplateView.as_view(template_name=\"social_app/survey_closed.html\"), name='homepage')/g" ${FILE}
-        
+        mv -f resources/urls-open.py ${FILE}        
         echo "Survey seasson is currently open."
     elif [ "$OPTION" == "close" ]; then    
-        sed -i "s/path('', TemplateView.as_view(template_name=\"social_app/index.html\"), name='homepage'),/#path('', TemplateView.as_view(template_name=\"social_app/index.html\"), name='homepage')/g" ${FILE}
-        sed -i "s/#path('', TemplateView.as_view(template_name=\"social_app/survey_closed.html\"), name='homepage'),/path('', TemplateView.as_view(template_name=\"social_app/survey_closed.html\"), name='homepage')/g" ${FILE}
-        
+        mv -f resources/urls-closed.py ${FILE}
         echo "Survey seasson is currently closed."
     else
         options
