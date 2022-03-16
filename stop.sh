@@ -14,7 +14,7 @@ abort()
 trap 'abort' 0
 set -e
 
-/bin/sh ./info.sh "Stopping application..."
+/bin/bash ./info.sh "Stopping application..."
 PID=$(head -n 1 teaching-stats.pid)
 
 rm teaching-stats.pid
