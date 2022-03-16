@@ -25,6 +25,7 @@ VERSION="0.0.5"
 PASS=''
 EMAIL=''
 HOST='' #used to allow remote to local connections, useful when running within containers
+LXD=''
 
 
 abort()
@@ -65,6 +66,18 @@ pip_req()
   fi
 }
 
+lxd_req()
+{
+  echo -e "${ORANGE}Is this instance running within an ${CYAN}LXD${ORANGE} container or similar?${NC} [y/N]"
+  read LXD
+
+  if [ "$LXD"="y" ]; then    
+    LXD="TRUE"
+  else
+    LXD="FALSE"
+  fi
+}
+
 pwd_req()
 {  
   while true; do        
@@ -82,11 +95,13 @@ pwd_req()
 }
 
 host_req()
-{    
+{
+  if [ -z "$LXD" ]; then    
+    lxd_req    
+  fi
+
   IPv4=$(hostname -I | cut -d' ' -f1)
-  echo -e "${ORANGE}Do you like to use ${CYAN}${IPv4}${ORANGE} as the current host address? Otherwise ${CYAN}${LOCALHOST}${ORANGE} will be used${ORANGE}:${NC} [y/N]"
-  read CONTINUE
-  if [ "$CONTINUE"="y" ]; then    
+  if [ "$LXD"="TRUE" ]; then    
     HOST=${IPv4}
   else
     HOST=${LOCALHOST}
@@ -379,8 +394,9 @@ populate()
   fi
 }
 
-metabase(){
-  MARK="$DIR/setup-metabase.done"
+metabase_env()
+{
+  MARK="$DIR/metabase-env.done"
   USER="metabase"
   FOLDER="/opt/${USER}"
 
@@ -423,9 +439,11 @@ metabase(){
     echo ":msg,contains,\"metabase\" ${FILE_LOG} & stop" >> ${FILE_CON}
 
     FILE_CON="/etc/rsyslog.conf"
-    echo -e "${ORANGE}Is this instance running within an ${CYAN}LXD${ORANGE} container or similar?${NC} [y/N]"
-    read CONTINUE
-    if [ "$CONTINUE"="y" ]; then    
+    if [ -z "$LXD" ]; then    
+      lxd_req    
+    fi
+    
+    if [ "$LXD"="TRUE" ]; then    
       sed -i "s/module(load=\"imklog\"/#module(load=\"imklog\"/g" ${FILE_CON}
     else
       sed -i "s/#module(load=\"imklog\"/module(load=\"imklog\"/g" ${FILE_CON}
@@ -436,7 +454,7 @@ metabase(){
 
     touch MARK
   else
-    echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} setup is already done, skipping...${NC}"
+    echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} environment is already setup, skipping...${NC}"
   fi
 
 }
@@ -479,7 +497,7 @@ setup_gauth
 populate master teaching-stats-db-population insert_data.py
 populate students teaching-stats-import-students insert_students.py
 
-metabase
+metabase_env
 
 trap : 0
 echo ""
