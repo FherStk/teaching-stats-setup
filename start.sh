@@ -1,5 +1,6 @@
 #!/bin/bash
 RED='\033[0;31m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 abort()
@@ -19,11 +20,11 @@ echo ""
 IPv4=$(hostname -I | cut -d' ' -f1)
 
 echo 
-echo "You can access to the survey system through:"
+echo "${CYAN}You can access to the survey system through:${NC}"
 echo "    http://${IPv4}:8000/"
 echo "    http://127.0.0.1:8000/"
 echo 
-echo "You can access to the survey stats through:"
+echo "${CYAN}You can access to the survey stats through:${NC}"
 echo "    http://${IPv4}:8000/resultats"
 echo "    http://127.0.0.1:8000/resultats"
 echo 
