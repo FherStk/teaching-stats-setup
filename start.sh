@@ -21,7 +21,7 @@ python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use '0.0.0.0:8000
 PID=$!  
 
 /bin/rm -f teaching-stats.pid
-touch teaching-stats.pid
+/bin/touch teaching-stats.pid
 echo ${PID} > teaching-stats.pid
 
 IPv4=$(hostname -I | cut -d' ' -f1)
