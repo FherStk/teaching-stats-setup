@@ -21,7 +21,7 @@ BBDD='teaching-stats'
 DIR="/var/www/${BBDD}"
 LOCALHOST="127.0.0.1" #Used for local connections like django -> postgres
 PSQL_PORT="5432"
-VERSION="0.0.4"
+VERSION="0.0.5"
 PASS=''
 EMAIL=''
 HOST='' #used to allow remote to local connections, useful when running within containers
@@ -340,9 +340,9 @@ populate(){
     echo -e "    3. Each $1 file will be loaded and its data will be pupulated through the database."
     echo ""
     echo -e "${ORANGE}Do you want to proceed loading the ${CYAN}$1${ORANGE} data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC} [y/N]"
-    read CONTINUE
+    read CONTINUE    
 
-    if [ "$CONTINUE"="y" ]; then         
+    if [ "$CONTINUE" == "y" ]; then
       if [ -z "$PASS" ]; then    
         pwd_req "${BBDD} database user"
       fi
@@ -364,6 +364,8 @@ populate(){
       cd ${FOLDER}      
       python3 $3
       cd ..
+    else
+      echo "Skipping..."  
     fi
 
     touch MARK
@@ -375,11 +377,7 @@ populate(){
 trap 'abort' 0
 set -e
 
-echo ""
-echo -e "${YELLOW}Setup for Teaching Stats:${NC} Install for localhost (v${VERSION})"
-echo -e "${YELLOW}Copyright © 2022:${NC} Marcos Alcocer Gil"
-echo -e "${YELLOW}Copyright © 2022:${NC} Fernando Porrino Serrano"
-echo -e "${YELLOW}Under the AGPL license:${NC} https://github.com/FherStk/${BBDD}-setup/blob/main/LICENSE"
+bash ./info.sh "Setup for localhost"
 
 echo ""
 echo -e "${LCYAN}Updating repo list:${NC}"
