@@ -3,6 +3,10 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 PATH="/var/www/teaching-stats"
 
+if [ -d "$HOME/bin" ] ; then
+    PATH="$HOME/bin:$PATH"
+fi
+
 abort()
 {
   #Source: https://stackoverflow.com/a/22224317    
@@ -14,11 +18,11 @@ abort()
 trap 'abort' 0
 set -e
 
-/bin/bash ./info.sh "Starting application..."
+bash ./info.sh "Starting application..."
 echo ""
 
 cd ${PATH}
-python3 manage.py runserver 0.0.0.0:8000  
+python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use '0.0.0.0:8000' when running within a container, in order to allow remote connections
 PID=$!  
 
 /bin/rm -f teaching-stats.pid
