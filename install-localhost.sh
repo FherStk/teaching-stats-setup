@@ -97,6 +97,7 @@ pwd_req()
 host_req()
 {
   if [ -z "$LXD" ]; then    
+    echo
     lxd_req    
   fi
 
@@ -388,7 +389,7 @@ populate()
       echo "Skipping..."  
     fi
 
-    touch MARK
+    touch $MARK
   else
     echo -e "${CYAN}The ${LCYAN}$1${CYAN} data for the ${LCYAN}${BBDD}${CYAN} database already populated, skipping...${NC}"
   fi
@@ -402,39 +403,41 @@ metabase_env()
 
   echo ""  
   if ! [ -f "$MARK" ]; then          
+    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} environment:${NC}"
+
     if [ $(getent group ${USER}) ]; then
-      echo -e "${CYAN}Group ${LCYAN}${USER}${CYAN} already exists, skipping...${NC}"
+      echo -e "   Group ${LCYAN}${USER}${NC} already exists, skipping..."
     else
-      echo -e "${LCYAN}Creating the ${CYAN}${USER}${LCYAN} group:${NC}"
+      echo -e "   Creating the ${LCYAN}${USER}${NC} group..."
       sudo addgroup --quiet --system ${USER}
     fi
     echo
 
     if id "$USER" &>/dev/null; then
-      echo -e "${CYAN}User ${LCYAN}${USER}${CYAN} already exists, skipping...${NC}"
+      echo -e "   User ${LCYAN}${USER}${NC} already exists, skipping..."
     else
-      echo -e "${LCYAN}Creating the ${CYAN}${USER}${LCYAN} user:${NC}"
+      echo -e "   Creating the ${LCYAN}${USER}${NC} user..."
       sudo adduser --quiet --system --ingroup ${USER} --no-create-home --disabled-password ${USER}
     fi
     echo
 
-    echo -e "${LCYAN}Creating the ${CYAN}${USER}${LCYAN} directory:${NC}"
+    echo -e "   Creating the ${LCYAN}${USER}${NC} directory..."
     mkdir -p ${FOLDER}
     sudo chown -R ${USER}:${USER} ${FOLDER}
     echo
 
     FILE_ENV="/etc/default/${USER}"
-    echo -e "${LCYAN}Setting up the ${CYAN}${USER}${LCYAN} enviroment:${NC}"
+    echo -e "   Setting up the ${LCYAN}${USER}${NC} enviroment..."
     touch ${FILE_ENV}
     sudo chmod 640 ${FILE_ENV}
 
     FILE_LOG="/var/log/${USER}.log"
-    echo -e "${LCYAN}Setting up the ${CYAN}${USER}${LCYAN} log files:${NC}"
+    echo -e "   Setting up the ${LCYAN}${USER}${NC} log files..."
     touch ${FILE_LOG}
     sudo chown ${USER}:${USER} ${FILE_LOG}
 
     FILE_CON="/etc/rsyslog.d/${USER}.conf"
-    echo -e "${LCYAN}Setting up the ${CYAN}${USER}${LCYAN} config files:${NC}"
+    echo -e "   Setting up the ${LCYAN}${USER}${NC} config files..."
     touch ${FILE_CON}
     echo ":msg,contains,\"metabase\" ${FILE_LOG} & stop" >> ${FILE_CON}
 
@@ -449,10 +452,10 @@ metabase_env()
       sed -i "s/#module(load=\"imklog\"/module(load=\"imklog\"/g" ${FILE_CON}
     fi
 
-    echo -e "${LCYAN}Restarting the ${CYAN}rsyslog${LCYAN} service:${NC}"
+    echo -e "   Restarting the ${LCYAN}rsyslog${NC} service..."
     systemctl restart rsyslog
 
-    touch MARK
+    touch $MARK
   else
     echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} environment is already setup, skipping...${NC}"
   fi
