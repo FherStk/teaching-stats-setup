@@ -411,7 +411,6 @@ metabase_env()
       echo -e "   Creating the ${LCYAN}${USER}${NC} group..."
       sudo addgroup --quiet --system ${USER}
     fi
-    echo
 
     if id "$USER" &>/dev/null; then
       echo -e "   User ${LCYAN}${USER}${NC} already exists, skipping..."
@@ -419,12 +418,10 @@ metabase_env()
       echo -e "   Creating the ${LCYAN}${USER}${NC} user..."
       sudo adduser --quiet --system --ingroup ${USER} --no-create-home --disabled-password ${USER}
     fi
-    echo
 
     echo -e "   Creating the ${LCYAN}${USER}${NC} directory..."
     mkdir -p ${FOLDER}
     sudo chown -R ${USER}:${USER} ${FOLDER}
-    echo
 
     FILE_ENV="/etc/default/${USER}"
     echo -e "   Setting up the ${LCYAN}${USER}${NC} enviroment..."
