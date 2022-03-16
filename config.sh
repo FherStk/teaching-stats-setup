@@ -1,7 +1,6 @@
 #!/bin/bash
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
-PATH="/var/www/teaching-stats"
 
 abort()
 {
@@ -23,11 +22,11 @@ options()
 trap 'abort' 0
 set -e
 
-FILE="${PATH}/social_app/urls.py"
+FILE="/var/www/teaching-stats/social_app/urls.py"
 MODE=${1}
 OPTION=${2}
 
-/bin/bash ./info.sh "Config"
+bash ./info.sh "Config"
 
 if [ "$MODE"="survey" ]; then    
     if [ "$OPTION"="open" ]; then    

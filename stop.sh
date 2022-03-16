@@ -1,7 +1,6 @@
 #!/bin/bash
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
-PATH="/var/www/teaching-stats"
 
 abort()
 {
@@ -14,7 +13,7 @@ abort()
 trap 'abort' 0
 set -e
 
-/bin/bash ./info.sh "Stopping application..."
+bash ./info.sh "Stopping application..."
 PID=$(head -n 1 teaching-stats.pid)
 
 rm teaching-stats.pid

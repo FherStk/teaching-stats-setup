@@ -377,7 +377,7 @@ populate(){
 trap 'abort' 0
 set -e
 
-/bin/bash ./info.sh "Setup for localhost"
+bash ./info.sh "Setup for localhost"
 
 echo ""
 echo -e "${LCYAN}Updating repo list:${NC}"
