@@ -1,4 +1,5 @@
 #!/bin/bash
+
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 PATH="/var/www/teaching-stats"
