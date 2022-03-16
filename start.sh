@@ -16,6 +16,7 @@ set -e
 bash ./info.sh "Starting application..."
 echo ""
 
+cd /var/www/teaching-stats
 python3 manage.py runserver 0.0.0.0:8000
 # CURRENT=${PWD##*/}
 # cd /var/www/teaching-stats
