@@ -16,10 +16,12 @@ set -e
 bash ./info.sh "Starting application..."
 echo ""
 
+CURRENT=${PWD##*/}
 cd /var/www/teaching-stats
 python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use '0.0.0.0:8000' when running within a container, in order to allow remote connections
 PID=$!  
 
+cd ${CURRENT}
 rm -f teaching-stats.pid
 touch teaching-stats.pid
 echo ${PID} > teaching-stats.pid
