@@ -31,11 +31,12 @@ bash ./info.sh "Config"
 
 if [ "$MODE" == "survey" ]; then
     if [ "$OPTION" == "open" ]; then    
-        mv -f resources/urls-open.py ${FILE}   
+        cp -f resources/urls-open.py ${FILE}   
         echo     
         echo -e "${GREEN}Survey seasson is currently open.${NC}"
     elif [ "$OPTION" == "close" ]; then    
-        mv -f resources/urls-closed.py ${FILE}
+        cp -f resources/urls-closed.py ${FILE}
+        echo   
         echo -e "${RED}Survey seasson is currently closed.${NC}"
     else
         options
