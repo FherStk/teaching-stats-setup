@@ -466,7 +466,7 @@ metabase_download()
   echo ""  
   if ! [ -f "$MARK" ]; then      
     echo -e "${CYAN}Downloading the lastest ${LCYAN}${USER}${CYAN} app version:${NC}"
-    wget https://www.metabase.com/start/oss/jar.html -O /opt/metabase/metabase.jar
+    wget https://downloads.metabase.com/v0.42.2/metabase.jar -O /opt/metabase/metabase.jar
 
     touch $MARK
   else
@@ -481,10 +481,12 @@ metabase_bbdd()
   echo ""  
   if ! [ -f "$MARK" ]; then      
     echo -e "${CYAN}Creating the ${LCYAN}${USER}${CYAN} database:${NC}"    
-    bbdd_create "${BBDD}-metabase"  
+    bbdd_create "${BBDD}-metabase"      
 
     mkdir -p /tmp/teaching-stats
     cp -f resources/metabase.sql /tmp/teaching-stats/metabase.sql    
+    
+    runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${BBDD}-metabase\" OWNER TO \"${BBDD}\";'"
     runuser -l postgres -c "psql -d \"${BBDD}-metabase\" -e < /tmp/teaching-stats/metabase.sql"
 
     touch $MARK
@@ -510,13 +512,13 @@ metabase_setup()
 
     echo "#!/bin/bash" >> ${FILE}
     echo "cd /opt/metabase" >> ${FILE}
-    echo "EXPORT MB_DB_TYPE=postgres" >> ${FILE}
-    echo "EXPORT MB_DB_DBNAME=${BBDD}-metabase" >> ${FILE}
-    echo "EXPORT MB_DB_PORT=5432" >> ${FILE}
-    echo "EXPORT MB_DB_USER=${BBDD}" >> ${FILE}
-    echo "EXPORT MB_DB_PASS=${PASS}" >> ${FILE}
-    echo "EXPORT MB_DB_HOST=127.0.0.1" >> ${FILE}
-    echo "/usr/bin/java -jar metabase.java" >> ${FILE}
+    echo "export MB_DB_TYPE=postgres" >> ${FILE}
+    echo "export MB_DB_DBNAME=${BBDD}-metabase" >> ${FILE}
+    echo "export MB_DB_PORT=5432" >> ${FILE}
+    echo "export MB_DB_USER=${BBDD}" >> ${FILE}
+    echo "export MB_DB_PASS=${PASS}" >> ${FILE}
+    echo "export MB_DB_HOST=127.0.0.1" >> ${FILE}
+    echo "/usr/bin/java -jar metabase.jar" >> ${FILE}
 
     chmod +x $FILE
 
