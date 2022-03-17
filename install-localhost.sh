@@ -68,6 +68,7 @@ pip_req()
 
 lxd_req()
 {
+  echo 
   echo -e "${ORANGE}Is this instance running within an ${CYAN}LXD${ORANGE} container or similar?${NC} [y/N]"
   read LXD
 
@@ -479,10 +480,13 @@ metabase_bbdd()
 
   echo ""  
   if ! [ -f "$MARK" ]; then      
-    echo -e "${CYAN}Creating the ${LCYAN}${USER}${CYAN} database:${NC}"
-    
+    echo -e "${CYAN}Creating the ${LCYAN}${USER}${CYAN} database:${NC}"    
     bbdd_create "${BBDD}-metabase"  
-    runuser -l postgres -c "psql -d \"${BBDD}-metabase\" -e < resources/metabase.sql"
+
+    CURRENT=${PWD##*/}
+    cd $HOME/${CURRENT}/resources
+    runuser -l postgres -c "psql -d \"${BBDD}-metabase\" -e < metabase.sql"
+    cd $HOME/${CURRENT}
 
     touch $MARK
   else
