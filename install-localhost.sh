@@ -473,6 +473,23 @@ metabase_download()
   fi
 }
 
+metabase_bbdd()
+{
+  MARK="$DIR/metabase-bbdd.done"  
+
+  echo ""  
+  if ! [ -f "$MARK" ]; then      
+    echo -e "${CYAN}Creating the ${LCYAN}${USER}${CYAN} database:${NC}"
+    
+    bbdd_create "${BBDD}-metabase"  
+    runuser -l postgres -c "psql -d \"${BBDD}-metabase\" -e < resources/metabase.sql"
+
+    touch $MARK
+  else
+    echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} database already exists, skipping...${NC}"
+  fi
+}
+
 metabase_setup()
 {
   MARK="$DIR/metabase-setup.done"
@@ -592,7 +609,7 @@ populate students teaching-stats-import-students insert_students.py
 
 metabase_env
 metabase_download
-bbdd_create "${BBDD}-metabase"
+metabase_bbdd
 metabase_setup
 metabase_service
 
