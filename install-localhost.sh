@@ -476,35 +476,14 @@ metabase_download()
 
 metabase_bbdd()
 {
-  MARK="$DIR/metabase-bbdd.done"  
-  FILE=".pgpass"
+  MARK="$DIR/metabase-bbdd.done"    
   METABASE="${BBDD}-metabase"
 
   if ! [ -f "$MARK" ]; then          
-    bbdd_create "${BBDD}-metabase"      
-    
-    echo 
-    echo -e "${CYAN}Setting up the ${LCYAN}metabase${CYAN} databse resources:${NC}"    
-    rm -f ${FILE}
-    touch ${FILE}
-
-    if [ -z "$PASS" ]; then    
-      pwd_req "${BBDD} database user"
-    fi    
-    echo "localhost:5432:${METABASE}:${BBDD}:${PASS}" >> ${FILE}
-    chmod 0600 ${FILE}
-    export PGPASSFILE=$HOME/${PWD##*/}/${FILE}
-
-    mkdir -p /tmp/teaching-stats
-    cp -f resources/metabase.sql /tmp/teaching-stats/metabase.sql    
-    
+    bbdd_create "${BBDD}-metabase"          
     runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${METABASE}\" OWNER TO \"${BBDD}\";'"
     runuser -l postgres -c "psql -d \"${METABASE}\" -e -c 'ALTER SCHEMA \"public\" OWNER TO \"${BBDD}\";'"
     runuser -l postgres -c "psql -d \"${METABASE}\" -e -c 'CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;'"    
-
-    echo 
-    echo -e "${CYAN}Importing the SQL Dump into the ${LCYAN}metabase${CYAN} database:${NC}" 
-    psql -e -h localhost -U "${BBDD}" -d "${METABASE}" < /tmp/teaching-stats/metabase.sql
 
     touch $MARK
   else
@@ -517,11 +496,101 @@ metabase_setup()
 {
   MARK="$DIR/metabase-setup.done"
   USER="metabase"
-  FILE="/opt/metabase/metabase-postgres.sh"
 
   echo ""  
   if ! [ -f "$MARK" ]; then      
     echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"
+    
+    #Option 1
+      #Step 1: create the empty BBDD (as now is done)
+      #Step 2: start metabase using this BBDD and display the instructions
+      #Step 3: the users follows the wizard
+      #Step 4: once done, continues
+      #Step 5: import the demo dashboards if the user wants to
+      #Step 6: set the service and continue
+
+    #Option 2 (automated but tricky and maybe buggy)
+      #Step 1: get the current email (same as django)
+      #Step 2: set this email as the admin within the metabase clean dump
+      #Step 3: import the clean dump
+      #Step 4: run metabase in pwd recovery mode in order to set the admin password
+      #Step 5: import the demo dashboards if the user wants to
+      #Step 6: set the service and continue
+    
+
+
+
+    java -jar /opt/metabase/metabase.jar  > /dev/null 2>&1 &
+    PID=$!  
+
+    host_req
+    #metabase pass -> 5K6bZ5JARm7wxe
+
+    echo -e "    1. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000${NC} and choose your language."
+    echo -e "    2. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000${NC} and choose your language."
+    echo -e "        1.1. Choose your language."
+    echo -e "        1.2. Fill your data."
+    echo -e "        1.3. Choose ${CYAN}PostgreSQL${NC} as the current database."
+    echo -e "        1.4. Choose ${CYAN}PostgreSQL${NC} as the current database."
+    echo ""
+    echo -e "    2. At the left panel, go to: ${CYAN}API and services -> OAuth consent screen${NC}"
+    echo -e "        2.1. User type: ${CYAN}external${NC}"
+    echo -e "        2.2. Press the ${CYAN}create${NC} button."
+    echo ""
+    echo -e "    3. Add the following app information:"
+    echo -e "        3.1. App name: ${CYAN}${BBDD}${NC}"
+    echo -e "        3.2. Support email: ${CYAN}${EMAIL}${NC}"
+    echo -e "        3.3. Developer contact information: ${CYAN}${EMAIL}${NC}"
+    echo -e "        3.4. Leave the other fields with its default values."
+    echo -e "        3.5. Press the ${CYAN}save and continue${NC} button."
+    echo -e "        3.6. Press the ${CYAN}save and continue${NC} button."
+    echo -e "        3.7. Press the ${CYAN}save and continue${NC} button."
+    echo -e "        3.8. Press the ${CYAN}return to panel${NC} button."
+    echo ""
+    echo -e "    4. At the left panel, go to: ${CYAN}API and services -> Credentials${NC}"
+    echo -e "        4.1. Press the ${CYAN}create credentials${NC} button."
+    echo -e "        4.2. Select the ${CYAN}OAuth client ID${NC} option."
+    echo -e "        4.3. Application type: ${CYAN}Web application${NC}"
+    echo -e "        4.4. Name: ${CYAN}${BBDD}${NC}"
+    echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}${URL}${NC}"
+    echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}${URL}/google/login/callback/${NC}"
+    echo -e "        4.7. Press the ${CYAN}create${NC} button."
+    echo -e "        4.8. Copy your ${CYAN}client id${NC} and ${CYAN}secret key${NC}, it will be required later."
+    echo ""
+    echo -e "Once completed the previous configuration, ${ORANGE}press any key to continue...${NC}"
+    read 
+
+
+
+
+
+
+
+
+
+    if [ -z "$PASS" ]; then    
+      pwd_req "${BBDD} database user"
+    fi
+
+    
+
+    touch $MARK
+  else
+    echo -e "${CYAN}The metabase ${LCYAN}${USER}${CYAN} instance is already setup, skipping...${NC}"
+  fi
+}
+
+metabase_service()
+{
+  MARK="$DIR/metabase-service.done"
+  USER="metabase"
+  SERVICE="/etc/systemd/system/metabase.service"
+  FILE="/opt/metabase/metabase-postgres.sh"
+
+  echo ""  
+  if ! [ -f "$MARK" ]; then      
+    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} service:${NC}"    
+    echo -e "   Creating the execution script for the current ${LCYAN}${USER}${NC} instance..."
     touch $FILE
     
     if [ -z "$PASS" ]; then    
@@ -537,47 +606,31 @@ metabase_setup()
     echo "export MB_DB_PASS=${PASS}" >> ${FILE}
     echo "export MB_DB_HOST=127.0.0.1" >> ${FILE}
     echo "/usr/bin/java -jar metabase.jar" >> ${FILE}
-
+    
     chmod +x $FILE
 
-    touch $MARK
-  else
-    echo -e "${CYAN}The metabase ${LCYAN}${USER}${CYAN} instance is already setup, skipping...${NC}"
-  fi
-}
-
-metabase_service()
-{
-  MARK="$DIR/metabase-service.done"
-  USER="metabase"
-  FILE="/etc/systemd/system/metabase.service"
-
-  echo ""  
-  if ! [ -f "$MARK" ]; then      
-    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} service:${NC}"    
-
     echo -e "   Creating the service file for the current ${LCYAN}${USER}${NC} instance..."
-    touch $FILE
-    echo "[Unit]" >> ${FILE}
-    echo "Description=Metabase Server" >> ${FILE}
-    echo "After=syslog.target" >> ${FILE}
-    echo "After=network.target" >> ${FILE}
-    echo "" >> ${FILE}
-    echo "[Service]" >> ${FILE}
-    echo "WorkingDirectory=/opt/metabase" >> ${FILE}
-    echo "ExecStart=/usr/bin/bash /opt/metabase/metabase-postgres.sh" >> ${FILE}
-    echo "EnvironmentFile=/etc/default/metabase" >> ${FILE}
-    echo "User=metabase" >> ${FILE}
-    echo "Type=simple" >> ${FILE}
-    echo "StandardOutput=syslog" >> ${FILE}
-    echo "StandardError=syslog" >> ${FILE}
-    echo "SyslogIdentifier=metabase" >> ${FILE}
-    echo "SuccessExitStatus=143" >> ${FILE}
-    echo "TimeoutStopSec=120" >> ${FILE}
-    echo "Restart=always" >> ${FILE}
-    echo "" >> ${FILE}
-    echo "[Install]" >> ${FILE} 
-    echo "WantedBy=multi-user.target" >> ${FILE}
+    touch $SERVICE
+    echo "[Unit]" >> ${SERVICE}
+    echo "Description=Metabase Server" >> ${SERVICE}
+    echo "After=syslog.target" >> ${SERVICE}
+    echo "After=network.target" >> ${SERVICE}
+    echo "" >> ${SERVICE}
+    echo "[Service]" >> ${SERVICE}
+    echo "WorkingDirectory=/opt/metabase" >> ${SERVICE}
+    echo "ExecStart=/usr/bin/bash ${FILE}" >> ${SERVICE}
+    echo "EnvironmentFile=/etc/default/metabase" >> ${SERVICE}
+    echo "User=metabase" >> ${SERVICE}
+    echo "Type=simple" >> ${SERVICE}
+    echo "StandardOutput=syslog" >> ${SERVICE}
+    echo "StandardError=syslog" >> ${SERVICE}
+    echo "SyslogIdentifier=metabase" >> ${SERVICE}
+    echo "SuccessExitStatus=143" >> ${SERVICE}
+    echo "TimeoutStopSec=120" >> ${SERVICE}
+    echo "Restart=always" >> ${SERVICE}
+    echo "" >> ${SERVICE}
+    echo "[Install]" >> ${SERVICE} 
+    echo "WantedBy=multi-user.target" >> ${SERVICE}
 
     echo -e "   Reloading the systemd daemon..."
     sudo systemctl daemon-reload 
@@ -591,6 +644,40 @@ metabase_service()
     echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} service already exists, skipping...${NC}"
   fi
 }
+
+metabase_populate()
+{
+  MARK="$DIR/metabase-populate.done"  
+  FILE=".pgpass"
+  METABASE="${BBDD}-metabase"
+
+  if ! [ -f "$MARK" ]; then              
+    echo 
+    echo -e "${CYAN}Setting up the ${LCYAN}metabase${CYAN} databse resources:${NC}"    
+    rm -f ${FILE}
+    touch ${FILE}
+
+    if [ -z "$PASS" ]; then    
+      pwd_req "${BBDD} database user"
+    fi    
+    echo "localhost:5432:${METABASE}:${BBDD}:${PASS}" >> ${FILE}
+    chmod 0600 ${FILE}
+    export PGPASSFILE=$HOME/${PWD##*/}/${FILE}
+
+    mkdir -p /tmp/teaching-stats
+    cp -f resources/metabase.sql /tmp/teaching-stats/metabase.sql               
+
+    echo 
+    echo -e "${CYAN}Importing the SQL Dump into the ${LCYAN}metabase${CYAN} database:${NC}" 
+    psql -e -h localhost -U "${BBDD}" -d "${METABASE}" < /tmp/teaching-stats/metabase.sql
+
+    touch $MARK
+  else
+    echo 
+    echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} database already exists, skipping...${NC}"
+  fi
+}
+
 
 trap 'abort' 0
 set -e
@@ -633,8 +720,9 @@ populate students teaching-stats-import-students insert_students.py
 metabase_env
 metabase_download
 metabase_bbdd
-metabase_setup
-metabase_service
+#metabase_setup
+#metabase_service
+#metabase_populate
 
 trap : 0
 echo ""
