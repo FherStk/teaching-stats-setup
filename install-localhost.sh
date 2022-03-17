@@ -483,8 +483,9 @@ metabase_bbdd()
     echo -e "${CYAN}Creating the ${LCYAN}${USER}${CYAN} database:${NC}"    
     bbdd_create "${BBDD}-metabase"  
 
-    DUMP=$(<resources/metabase.sql)    
-    runuser -l postgres -c "psql -d \"${BBDD}-metabase\" -e -c \'${DUMP}\'"
+    mkdir -f /tmp/teaching-stats
+    cp -f resources/metabase.sql /tmp/teaching-stats/metabase.sql    
+    runuser -l postgres -c "psql -d \"${BBDD}-metabase\" -e < /tmp/teaching-stats/metabase.sql"
 
     touch $MARK
   else
