@@ -478,7 +478,8 @@ metabase_bbdd()
 {
   MARK="$DIR/metabase-bbdd.done"  
   FILE=".pgpass"
-  
+  METABASE="${BBDD}-metabase"
+
   if ! [ -f "$MARK" ]; then          
     bbdd_create "${BBDD}-metabase"      
     
@@ -490,20 +491,20 @@ metabase_bbdd()
     if [ -z "$PASS" ]; then    
       pwd_req "${BBDD} database user"
     fi    
-    echo "localhost:5432:${BBDD}-metabase:${BBDD}:${PASS}" >> ${FILE}
+    echo "localhost:5432:${METABASE}:${BBDD}:${PASS}" >> ${FILE}
     chmod 0600 ${FILE}
     export PGPASSFILE=$HOME/${PWD##*/}/${FILE}
 
     mkdir -p /tmp/teaching-stats
     cp -f resources/metabase.sql /tmp/teaching-stats/metabase.sql    
     
-    runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${BBDD}-metabase\" OWNER TO \"${BBDD}\";'"
-    runuser -l postgres -c "psql -d \"${BBDD}-metabase\" -e -c 'ALTER SCHEMA \"public\" OWNER TO \"${BBDD}\";'"
-    runuser -l postgres -c "psql -d \"${BBDD}-metabase\" -e -c 'CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;'"    
+    runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${METABASE}\" OWNER TO \"${BBDD}\";'"
+    runuser -l postgres -c "psql -d \"${METABASE}\" -e -c 'ALTER SCHEMA \"public\" OWNER TO \"${BBDD}\";'"
+    runuser -l postgres -c "psql -d \"${METABASE}\" -e -c 'CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;'"    
 
     echo 
     echo -e "${CYAN}Importing the SQL Dump into the ${LCYAN}metabase${CYAN} database:${NC}" 
-    psql -e -h localhost -U "${BBDD}" -d "${BBDD}-metabase" < /tmp/teaching-stats/metabase.sql
+    psql -e -h localhost -U "${BBDD}" -d "${METABASE}" < /tmp/teaching-stats/metabase.sql
 
     touch $MARK
   else
