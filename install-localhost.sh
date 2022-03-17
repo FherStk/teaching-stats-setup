@@ -477,17 +477,35 @@ metabase_download()
 metabase_bbdd()
 {
   MARK="$DIR/metabase-bbdd.done"  
+  FILE=".pgpass"
 
   echo ""  
-  if ! [ -f "$MARK" ]; then      
-    echo -e "${CYAN}Creating the ${LCYAN}${USER}${CYAN} database:${NC}"    
+  if ! [ -f "$MARK" ]; then          
     bbdd_create "${BBDD}-metabase"      
 
+    echo -e "${CYAN}Setting up the ${LCYAN}metabase${CYAN} databse resources:${NC}"    
+    echo -e "   Setting up the connection string..."    
+    rm -f ${FILE}
+    touch ${FILE}
+
+    if [ -z "$PASS" ]; then    
+      pwd_req "${BBDD} database user"
+    fi    
+    echo "localhost:5432:${BBDD}-metabase:${BBDD}:${PASS}" >> ${FILE}
+    chmod 0600 ${FILE}
+    export PGPASSFILE=$HOME/${PWD##*/}/${FILE}
+
+    echo -e "   Copying SQL dump file..."    
     mkdir -p /tmp/teaching-stats
     cp -f resources/metabase.sql /tmp/teaching-stats/metabase.sql    
     
+    echo -e "   Setting up database permissions..."    
     runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${BBDD}-metabase\" OWNER TO \"${BBDD}\";'"
-    runuser -l postgres -c "psql -d \"${BBDD}-metabase\" -e < /tmp/teaching-stats/metabase.sql"
+    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'ALTER SCHEMA \"public\" OWNER TO \"${BBDD}\";'"
+
+    echo 
+    echo -e "${CYAN}Importing the SQL Dump into the ${LCYAN}metabase${CYAN} database:${NC}" 
+    psql -e -h localhost -U "${BBDD}" -d "${BBDD}-metabase" < /tmp/teaching-stats/metabase.sql
 
     touch $MARK
   else
