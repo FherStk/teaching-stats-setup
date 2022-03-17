@@ -499,7 +499,7 @@ metabase_bbdd()
     
     runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${BBDD}-metabase\" OWNER TO \"${BBDD}\";'"
     runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'ALTER SCHEMA \"public\" OWNER TO \"${BBDD}\";'"
-    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public; COMMENT ON EXTENSION citext IS 'data type for case-insensitive character strings';'"    
+    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public; COMMENT ON EXTENSION citext IS \'data type for case-insensitive character strings\';'"    
 
     echo 
     echo -e "${CYAN}Importing the SQL Dump into the ${LCYAN}metabase${CYAN} database:${NC}" 
