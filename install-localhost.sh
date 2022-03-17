@@ -484,7 +484,7 @@ metabase_bbdd()
     bbdd_create "${BBDD}-metabase"  
 
     DUMP=$(<resources/metabase.sql)    
-    runuser -l postgres -c "psql -d \"${BBDD}-metabase\" -e -c ${DUMP}"
+    runuser -l postgres -c "psql -d \"${BBDD}-metabase\" -e -c \'${DUMP}\'"
 
     touch $MARK
   else
