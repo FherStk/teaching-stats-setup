@@ -477,12 +477,23 @@ metabase_download()
 metabase_bbdd()
 {
   MARK="$DIR/metabase-bbdd.done"  
+  FILE=".pgpass"
   
   if ! [ -f "$MARK" ]; then          
     bbdd_create "${BBDD}-metabase"      
+    
+    echo 
+    echo -e "${CYAN}Setting up the ${LCYAN}metabase${CYAN} databse resources:${NC}"    
+    rm -f ${FILE}
+    touch ${FILE}
 
-    echo ""  
-    echo -e "${CYAN}Populating the ${LCYAN}metabase${CYAN} databse:${NC}"    
+    if [ -z "$PASS" ]; then    
+      pwd_req "${BBDD} database user"
+    fi    
+    echo "localhost:5432:${BBDD}-metabase:${BBDD}:${PASS}" >> ${FILE}
+    chmod 0600 ${FILE}
+    export PGPASSFILE=$HOME/${PWD##*/}/${FILE}
+
     mkdir -p /tmp/teaching-stats
     cp -f resources/metabase.sql /tmp/teaching-stats/metabase.sql    
     
@@ -490,12 +501,13 @@ metabase_bbdd()
     runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'ALTER SCHEMA \"public\" OWNER TO \"${BBDD}\";'"
     runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public; GRANT ALL ON ALL FUNCTIONS IN SCHEMA public TO \"${BBDD}\"; '"    
 
-    #import the repo https://gist.github.com/RockyMM/dd89aed75f3de9a2cd76
-    #use the sh script to change the owner to "teaching-stats"
+    echo 
+    echo -e "${CYAN}Importing the SQL Dump into the ${LCYAN}metabase${CYAN} database:${NC}" 
+    psql -e -h localhost -U "${BBDD}" -d "${BBDD}-metabase" < /tmp/teaching-stats/metabase.sql
 
     touch $MARK
   else
-    echo ""  
+    echo 
     echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} database already exists, skipping...${NC}"
   fi
 }
