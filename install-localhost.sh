@@ -478,13 +478,12 @@ metabase_bbdd()
 {
   MARK="$DIR/metabase-bbdd.done"  
   FILE=".pgpass"
-
-  echo ""  
+  
   if ! [ -f "$MARK" ]; then          
     bbdd_create "${BBDD}-metabase"      
-
+    
+    echo 
     echo -e "${CYAN}Setting up the ${LCYAN}metabase${CYAN} databse resources:${NC}"    
-    echo -e "   Setting up the connection string..."    
     rm -f ${FILE}
     touch ${FILE}
 
@@ -495,13 +494,12 @@ metabase_bbdd()
     chmod 0600 ${FILE}
     export PGPASSFILE=$HOME/${PWD##*/}/${FILE}
 
-    echo -e "   Copying SQL dump file..."    
     mkdir -p /tmp/teaching-stats
     cp -f resources/metabase.sql /tmp/teaching-stats/metabase.sql    
     
-    echo -e "   Setting up database permissions..."    
     runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${BBDD}-metabase\" OWNER TO \"${BBDD}\";'"
     runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'ALTER SCHEMA \"public\" OWNER TO \"${BBDD}\";'"
+    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'CREATE EXTENSION IF NOT EXISTS citext WITH SCHEMA public;'"    
 
     echo 
     echo -e "${CYAN}Importing the SQL Dump into the ${LCYAN}metabase${CYAN} database:${NC}" 
@@ -509,6 +507,7 @@ metabase_bbdd()
 
     touch $MARK
   else
+    echo 
     echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} database already exists, skipping...${NC}"
   fi
 }
