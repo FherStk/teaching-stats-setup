@@ -610,8 +610,8 @@ metabase_populate()
     echo 
     echo -e "${LCYAN}Populating metabase dashboards data within the ${CYAN}${BBDD}${LCYAN} database:${NC}"   
     echo -e "    1. Go to the ${CYAN}resources${NC} folder."
-    echo -e "    2. Review the metabase.sql file and perform any modification you need."
-    echo -e "    3. The metabase.sql file will be loaded into the database, which will generate the dashboards with the survey results."
+    echo -e "    2. Review the ${CYAN}metabase.sql${NC} file and perform any modification you need."
+    echo -e "    3. The ${CYAN}metabase.sql${NC} file will be loaded into the database, which will generate the dashboards with the survey results."
     echo ""
     echo -e "${ORANGE}Do you want to proceed loading the ${CYAN}dasboards${ORANGE} data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC} [y/N]"
     read CONTINUE   
