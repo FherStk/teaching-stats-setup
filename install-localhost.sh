@@ -677,6 +677,13 @@ metabase_env
 metabase_download
 metabase_bbdd
 metabase_service
+
+#TODO: pipulating the dashboards over an existing metabase instance is really complex due foreign keys
+#Proposal:
+#   1. Ask the user if wants a clean metabase install or the survey's one
+#   2. For option 1 -> use the current metabase_setup method
+#   3. For option 2 -> ask the user for data, replace the dump, and restore the dump. After that, run the password reset.
+
 metabase_setup     #metabase pass during testing -> 5K6bZ5JARm7wxe
 metabase_populate
 
