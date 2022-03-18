@@ -615,23 +615,13 @@ metabase_populate()
     echo ""
     echo -e "${ORANGE}Do you want to proceed loading the ${CYAN}dasboards${ORANGE} data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC} [y/N]"
     read CONTINUE   
-    # rm -f ${FILE}
-    # touch ${FILE}
-
-    # if [ -z "$PASS" ]; then    
-    #   pwd_req "${BBDD} database user"
-    # fi    
-    # echo "localhost:5432:${METABASE}:${BBDD}:${PASS}" >> ${FILE}
-    # chmod 0600 ${FILE}
-    # export PGPASSFILE=$HOME/${PWD##*/}/${FILE}
-
+   
     if [ "$CONTINUE" == "y" ]; then
       mkdir -p /tmp/teaching-stats
       cp -f resources/metabase.sql /tmp/teaching-stats/metabase.sql               
 
       echo 
       echo -e "${CYAN}Importing the SQL dump into the ${LCYAN}${BBDD}${CYAN} database:${NC}" 
-      #psql -e -h localhost -U "${BBDD}" -d "${METABASE}" < /tmp/teaching-stats/metabase.sql
       runuser -l postgres -c "psql -v ON_ERROR_STOP=1 -d \"${BBDD}\" -e < /tmp/teaching-stats/metabase.sql"
     else
       echo "Skipping..."  
