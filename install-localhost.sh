@@ -289,7 +289,7 @@ setup_gauth()
     echo -e "        4.7. Press the ${CYAN}create${NC} button."
     echo -e "        4.8. Copy your ${CYAN}client id${NC} and ${CYAN}secret key${NC}, it will be required later."
     echo ""
-    echo -e "Once completed the previous configuration, ${ORANGE}press any key to continue...${NC}"
+    echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
     read 
 
     echo ""
@@ -312,7 +312,7 @@ setup_gauth()
     echo -e "        You can leave the ${CYAN}key${NC} field empty."
     echo -e "    4. Add ${CYAN}${HOST}:8000${NC} to Chosen sites and save the new settings."
     echo ""
-    echo -e "Once completed the previous configuration, ${ORANGE}press any key to continue...${NC}"
+    echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
     read 
 
     kill $PID
@@ -548,9 +548,7 @@ metabase_service()
     sudo systemctl daemon-reload 
 
     echo -e "   Starting the ${LCYAN}${USER}${NC} service..."
-    sudo systemctl enable metabase.service
-    sudo systemctl start metabase.service
-
+    sudo systemctl enable metabase.service   
     touch $MARK
   else
     echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} service already exists, skipping...${NC}"
@@ -566,71 +564,35 @@ metabase_setup()
   echo ""  
   if ! [ -f "$MARK" ]; then      
     echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"
-    
-    #Option 1
-      #Step 1: create the empty BBDD (as now is done)
-      #Step 2: start metabase using this BBDD and display the instructions
-      #Step 3: the users follows the wizard
-      #Step 4: once done, continues
-      #Step 5: import the demo dashboards if the user wants to
-      #Step 6: set the service and continue
-
-    #Option 2 (automated but tricky and maybe buggy)
-      #Step 1: get the current email (same as django)
-      #Step 2: set this email as the admin within the metabase clean dump
-      #Step 3: import the clean dump
-      #Step 4: run metabase in pwd recovery mode in order to set the admin password
-      #Step 5: import the demo dashboards if the user wants to
-      #Step 6: set the service and continue    
-
+    sudo systemctl start metabase.service
+    sleep 5 #wait a bit for the service to start 
+   
     host_req
+    if [ -z "$PASS" ]; then    
+      pwd_req "${BBDD} database user"
+    fi
+    
     #metabase pass -> 5K6bZ5JARm7wxe
 
-    echo -e "    1. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000${NC} and choose your language."
+    echo -e "    1. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000${NC} (first load can take a while, so please, be patient)."
+    echo -e "        1.1. Choose your language."    
     echo -e "    2. Fill your personal data."    
+    echo -e "        2.1. Please, do not forget your password."    
     echo -e "    3. Choose ${CYAN}PostgreSQL${NC} as the current database."
     echo -e "        3.1. Choose ${CYAN}PostgreSQL${NC} as the current database."
-    echo ""
-    # echo -e "    2. At the left panel, go to: ${CYAN}API and services -> OAuth consent screen${NC}"
-    # echo -e "        2.1. User type: ${CYAN}external${NC}"
-    # echo -e "        2.2. Press the ${CYAN}create${NC} button."
-    # echo ""
-    # echo -e "    3. Add the following app information:"
-    # echo -e "        3.1. App name: ${CYAN}${BBDD}${NC}"
-    # echo -e "        3.2. Support email: ${CYAN}${EMAIL}${NC}"
-    # echo -e "        3.3. Developer contact information: ${CYAN}${EMAIL}${NC}"
-    # echo -e "        3.4. Leave the other fields with its default values."
-    # echo -e "        3.5. Press the ${CYAN}save and continue${NC} button."
-    # echo -e "        3.6. Press the ${CYAN}save and continue${NC} button."
-    # echo -e "        3.7. Press the ${CYAN}save and continue${NC} button."
-    # echo -e "        3.8. Press the ${CYAN}return to panel${NC} button."
-    # echo ""
-    # echo -e "    4. At the left panel, go to: ${CYAN}API and services -> Credentials${NC}"
-    # echo -e "        4.1. Press the ${CYAN}create credentials${NC} button."
-    # echo -e "        4.2. Select the ${CYAN}OAuth client ID${NC} option."
-    # echo -e "        4.3. Application type: ${CYAN}Web application${NC}"
-    # echo -e "        4.4. Name: ${CYAN}${BBDD}${NC}"
-    # echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}${URL}${NC}"
-    # echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}${URL}/google/login/callback/${NC}"
-    # echo -e "        4.7. Press the ${CYAN}create${NC} button."
-    # echo -e "        4.8. Copy your ${CYAN}client id${NC} and ${CYAN}secret key${NC}, it will be required later."
-    # echo ""
+    echo -e "        3.2. Set ${CYAN}${BBDD}${NC} as the display name."
+    echo -e "        3.3. Set ${CYAN}localhost${NC} as the server name."
+    echo -e "        3.4. Set ${CYAN}5432${NC} as the server port."
+    echo -e "        3.5. Set ${CYAN}${BBDD}${NC} as the database name."
+    echo -e "        3.6. Set ${CYAN}${BBDD}${NC} as the database username."
+    echo -e "        3.7. Set ${CYAN}${PASS}${NC} as the database password."
+    echo -e "        3.8. Other data can be let with the default values."
+    echo -e "    4. Choose if you want to share your anonymous data with the metabase staff."
+    echo -e "    5. Choose if you want to subscribe to the metabase mailing list."
+    echo -e "    6. Save your changes finishing the wizard."
+    echo 
     echo -e "Once completed the previous configuration, ${ORANGE}press any key to continue...${NC}"
     read 
-
-
-
-
-
-
-
-
-
-    # if [ -z "$PASS" ]; then    
-    #   pwd_req "${BBDD} database user"
-    # fi
-
-    
 
     touch $MARK
   else
