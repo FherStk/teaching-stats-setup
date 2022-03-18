@@ -492,94 +492,6 @@ metabase_bbdd()
   fi
 }
 
-metabase_setup()
-{
-  MARK="$DIR/metabase-setup.done"
-  USER="metabase"
-
-  echo ""  
-  if ! [ -f "$MARK" ]; then      
-    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"
-    
-    #Option 1
-      #Step 1: create the empty BBDD (as now is done)
-      #Step 2: start metabase using this BBDD and display the instructions
-      #Step 3: the users follows the wizard
-      #Step 4: once done, continues
-      #Step 5: import the demo dashboards if the user wants to
-      #Step 6: set the service and continue
-
-    #Option 2 (automated but tricky and maybe buggy)
-      #Step 1: get the current email (same as django)
-      #Step 2: set this email as the admin within the metabase clean dump
-      #Step 3: import the clean dump
-      #Step 4: run metabase in pwd recovery mode in order to set the admin password
-      #Step 5: import the demo dashboards if the user wants to
-      #Step 6: set the service and continue
-    
-
-
-
-    java -jar /opt/metabase/metabase.jar  > /dev/null 2>&1 &
-    PID=$!  
-
-    host_req
-    #metabase pass -> 5K6bZ5JARm7wxe
-
-    echo -e "    1. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000${NC} and choose your language."
-    echo -e "    2. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000${NC} and choose your language."
-    echo -e "        1.1. Choose your language."
-    echo -e "        1.2. Fill your data."
-    echo -e "        1.3. Choose ${CYAN}PostgreSQL${NC} as the current database."
-    echo -e "        1.4. Choose ${CYAN}PostgreSQL${NC} as the current database."
-    echo ""
-    echo -e "    2. At the left panel, go to: ${CYAN}API and services -> OAuth consent screen${NC}"
-    echo -e "        2.1. User type: ${CYAN}external${NC}"
-    echo -e "        2.2. Press the ${CYAN}create${NC} button."
-    echo ""
-    echo -e "    3. Add the following app information:"
-    echo -e "        3.1. App name: ${CYAN}${BBDD}${NC}"
-    echo -e "        3.2. Support email: ${CYAN}${EMAIL}${NC}"
-    echo -e "        3.3. Developer contact information: ${CYAN}${EMAIL}${NC}"
-    echo -e "        3.4. Leave the other fields with its default values."
-    echo -e "        3.5. Press the ${CYAN}save and continue${NC} button."
-    echo -e "        3.6. Press the ${CYAN}save and continue${NC} button."
-    echo -e "        3.7. Press the ${CYAN}save and continue${NC} button."
-    echo -e "        3.8. Press the ${CYAN}return to panel${NC} button."
-    echo ""
-    echo -e "    4. At the left panel, go to: ${CYAN}API and services -> Credentials${NC}"
-    echo -e "        4.1. Press the ${CYAN}create credentials${NC} button."
-    echo -e "        4.2. Select the ${CYAN}OAuth client ID${NC} option."
-    echo -e "        4.3. Application type: ${CYAN}Web application${NC}"
-    echo -e "        4.4. Name: ${CYAN}${BBDD}${NC}"
-    echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}${URL}${NC}"
-    echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}${URL}/google/login/callback/${NC}"
-    echo -e "        4.7. Press the ${CYAN}create${NC} button."
-    echo -e "        4.8. Copy your ${CYAN}client id${NC} and ${CYAN}secret key${NC}, it will be required later."
-    echo ""
-    echo -e "Once completed the previous configuration, ${ORANGE}press any key to continue...${NC}"
-    read 
-
-
-
-
-
-
-
-
-
-    if [ -z "$PASS" ]; then    
-      pwd_req "${BBDD} database user"
-    fi
-
-    
-
-    touch $MARK
-  else
-    echo -e "${CYAN}The metabase ${LCYAN}${USER}${CYAN} instance is already setup, skipping...${NC}"
-  fi
-}
-
 metabase_service()
 {
   MARK="$DIR/metabase-service.done"
@@ -644,6 +556,88 @@ metabase_service()
     echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} service already exists, skipping...${NC}"
   fi
 }
+
+
+metabase_setup()
+{
+  MARK="$DIR/metabase-setup.done"
+  USER="metabase"
+
+  echo ""  
+  if ! [ -f "$MARK" ]; then      
+    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"
+    
+    #Option 1
+      #Step 1: create the empty BBDD (as now is done)
+      #Step 2: start metabase using this BBDD and display the instructions
+      #Step 3: the users follows the wizard
+      #Step 4: once done, continues
+      #Step 5: import the demo dashboards if the user wants to
+      #Step 6: set the service and continue
+
+    #Option 2 (automated but tricky and maybe buggy)
+      #Step 1: get the current email (same as django)
+      #Step 2: set this email as the admin within the metabase clean dump
+      #Step 3: import the clean dump
+      #Step 4: run metabase in pwd recovery mode in order to set the admin password
+      #Step 5: import the demo dashboards if the user wants to
+      #Step 6: set the service and continue    
+
+    host_req
+    #metabase pass -> 5K6bZ5JARm7wxe
+
+    echo -e "    1. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000${NC} and choose your language."
+    echo -e "    2. Fill your personal data."    
+    echo -e "    3. Choose ${CYAN}PostgreSQL${NC} as the current database."
+    echo -e "        3.1. Choose ${CYAN}PostgreSQL${NC} as the current database."
+    echo ""
+    # echo -e "    2. At the left panel, go to: ${CYAN}API and services -> OAuth consent screen${NC}"
+    # echo -e "        2.1. User type: ${CYAN}external${NC}"
+    # echo -e "        2.2. Press the ${CYAN}create${NC} button."
+    # echo ""
+    # echo -e "    3. Add the following app information:"
+    # echo -e "        3.1. App name: ${CYAN}${BBDD}${NC}"
+    # echo -e "        3.2. Support email: ${CYAN}${EMAIL}${NC}"
+    # echo -e "        3.3. Developer contact information: ${CYAN}${EMAIL}${NC}"
+    # echo -e "        3.4. Leave the other fields with its default values."
+    # echo -e "        3.5. Press the ${CYAN}save and continue${NC} button."
+    # echo -e "        3.6. Press the ${CYAN}save and continue${NC} button."
+    # echo -e "        3.7. Press the ${CYAN}save and continue${NC} button."
+    # echo -e "        3.8. Press the ${CYAN}return to panel${NC} button."
+    # echo ""
+    # echo -e "    4. At the left panel, go to: ${CYAN}API and services -> Credentials${NC}"
+    # echo -e "        4.1. Press the ${CYAN}create credentials${NC} button."
+    # echo -e "        4.2. Select the ${CYAN}OAuth client ID${NC} option."
+    # echo -e "        4.3. Application type: ${CYAN}Web application${NC}"
+    # echo -e "        4.4. Name: ${CYAN}${BBDD}${NC}"
+    # echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}${URL}${NC}"
+    # echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}${URL}/google/login/callback/${NC}"
+    # echo -e "        4.7. Press the ${CYAN}create${NC} button."
+    # echo -e "        4.8. Copy your ${CYAN}client id${NC} and ${CYAN}secret key${NC}, it will be required later."
+    # echo ""
+    echo -e "Once completed the previous configuration, ${ORANGE}press any key to continue...${NC}"
+    read 
+
+
+
+
+
+
+
+
+
+    # if [ -z "$PASS" ]; then    
+    #   pwd_req "${BBDD} database user"
+    # fi
+
+    
+
+    touch $MARK
+  else
+    echo -e "${CYAN}The metabase ${LCYAN}${USER}${CYAN} instance is already setup, skipping...${NC}"
+  fi
+}
+
 
 metabase_populate()
 {
@@ -720,8 +714,8 @@ populate students teaching-stats-import-students insert_students.py
 metabase_env
 metabase_download
 metabase_bbdd
-#metabase_setup
-#metabase_service
+metabase_service
+metabase_setup
 #metabase_populate
 
 trap : 0
