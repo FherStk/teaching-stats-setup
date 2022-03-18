@@ -580,7 +580,7 @@ metabase_setup()
     
     sed -i "s/-jar metabase.jar reset-password ${EMAIL}/-jar metabase.jar/g" ${FILE}
     sudo systemctl start metabase.service
-    sleep 10  
+    sleep 10  #TODO: should wait till metabase is ready
 
     echo
     echo -e "    1. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000/auth/reset_password/:token${NC} (first load can take a while, so please, be patient)."
