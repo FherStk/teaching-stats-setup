@@ -632,7 +632,7 @@ metabase_populate()
       echo 
       echo -e "${CYAN}Importing the SQL dump into the ${LCYAN}${BBDD}${CYAN} database:${NC}" 
       #psql -e -h localhost -U "${BBDD}" -d "${METABASE}" < /tmp/teaching-stats/metabase.sql
-      runuser -l postgres -c "psql -d \"${BBDD}\" -e < /tmp/teaching-stats/metabase.sql"
+      runuser -l postgres -c "psql -v ON_ERROR_STOP=1 -d \"${BBDD}\" -e < /tmp/teaching-stats/metabase.sql"
     else
       echo "Skipping..."  
     fi
