@@ -599,7 +599,6 @@ metabase_setup()
   fi
 }
 
-
 metabase_populate()
 {
   MARK="$DIR/metabase-populate.done"  
@@ -608,12 +607,12 @@ metabase_populate()
 
   if ! [ -f "$MARK" ]; then              
     echo 
-    echo -e "${LCYAN}Populating metabase dashboards data within the ${CYAN}${BBDD}${LCYAN} database:${NC}"   
+    echo -e "${LCYAN}Populating metabase dashboards data within the ${CYAN}${METABASE}${LCYAN} database:${NC}"   
     echo -e "    1. Go to the ${CYAN}resources${NC} folder."
     echo -e "    2. Review the ${CYAN}metabase.sql${NC} file and perform any modification you need."
     echo -e "    3. The ${CYAN}metabase.sql${NC} file will be loaded into the database, which will generate the dashboards with the survey results."
     echo ""
-    echo -e "${ORANGE}Do you want to proceed loading the ${CYAN}dasboards${ORANGE} data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC} [y/N]"
+    echo -e "${ORANGE}Do you want to proceed loading the ${CYAN}dasboards${ORANGE} data into the ${CYAN}${METABASE}${ORANGE} database using the previous files?${NC} [y/N]"
     read CONTINUE   
    
     if [ "$CONTINUE" == "y" ]; then
@@ -621,8 +620,8 @@ metabase_populate()
       cp -f resources/metabase.sql /tmp/teaching-stats/metabase.sql               
 
       echo 
-      echo -e "${CYAN}Importing the SQL dump into the ${LCYAN}${BBDD}${CYAN} database:${NC}" 
-      runuser -l postgres -c "psql -v ON_ERROR_STOP=1 -d \"${BBDD}\" -e < /tmp/teaching-stats/metabase.sql"
+      echo -e "${CYAN}Importing the SQL dump into the ${LCYAN}${METABASE}${CYAN} database:${NC}" 
+      runuser -l postgres -c "psql -v ON_ERROR_STOP=1 -d \"${METABASE}\" -e < /tmp/teaching-stats/metabase.sql"
     else
       echo "Skipping..."  
     fi
@@ -631,7 +630,7 @@ metabase_populate()
     touch $MARK
   else
     echo 
-    echo -e "${CYAN}The ${LCYAN}${BBDD}${CYAN} database has been already populated, skipping...${NC}"
+    echo -e "${CYAN}The ${LCYAN}${METABASE}${CYAN} database has been already populated, skipping...${NC}"
   fi
 }
 
