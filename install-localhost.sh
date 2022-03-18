@@ -565,7 +565,7 @@ metabase_setup()
   if ! [ -f "$MARK" ]; then      
     echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"
     sudo systemctl start metabase.service
-    sleep 5 #wait a bit for the service to start 
+    sleep 5 #wait a bit for the service to start TODO: wait till the service is ready
    
     host_req
     if [ -z "$PASS" ]; then    
