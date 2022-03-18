@@ -68,45 +68,58 @@ pip_req()
 
 lxd_req()
 {
-  echo 
-  echo -e "${ORANGE}Is this instance running within an ${CYAN}LXD${ORANGE} container or similar?${NC} [y/N]"
-  read LXD
+  if [ -z "$LXD" ]; then   
+    echo 
+    echo -e "${ORANGE}Is this instance running within an ${CYAN}LXD${ORANGE} container or similar?${NC} [y/N]"
+    read LXD
 
-  if [ "$LXD"="y" ]; then    
-    LXD="TRUE"
-  else
-    LXD="FALSE"
+    if [ "$LXD"="y" ]; then    
+      LXD="TRUE"
+    else
+      LXD="FALSE"
+    fi
   fi
 }
 
 pwd_req()
 {  
-  while true; do        
-    echo -e "${ORANGE}Please, provide the password for the ${CYAN}${BBDD}${ORANGE} ${1}:${NC}"
-    read -s PASS
+  if [ -z "$PASS" ]; then    
+    while true; do        
+      echo -e "${ORANGE}Please, provide the password for the ${CYAN}${BBDD}${ORANGE} ${1}:${NC}"
+      read -s PASS
 
-    echo -e "${ORANGE}Set the password (again):${NC}"
-    read -s PASS2
-    echo ""
+      echo -e "${ORANGE}Set the password (again):${NC}"
+      read -s PASS2
+      echo ""
 
-    [ "$PASS" = "$PASS2" ] && break
-    echo -e "${RED}Password missmatch, please try again.${NC}"
-    echo ""
-  done  
+      [ "$PASS" = "$PASS2" ] && break
+      echo -e "${RED}Password missmatch, please try again.${NC}"
+      echo ""
+    done  
+  fi
 }
 
 host_req()
 {
-  if [ -z "$LXD" ]; then    
+  if [ -z "$HOST" ]; then    
     echo
     lxd_req    
-  fi
 
-  IPv4=$(hostname -I | cut -d' ' -f1)
-  if [ "$LXD"="TRUE" ]; then    
-    HOST=${IPv4}
-  else
-    HOST=${LOCALHOST}
+    IPv4=$(hostname -I | cut -d' ' -f1)
+    if [ "$LXD"="TRUE" ]; then    
+      HOST=${IPv4}
+    else
+      HOST=${LOCALHOST}
+    fi
+  fi
+}
+
+email_req()
+{
+  if [ -z "$EMAIL" ]; then    
+    echo
+    echo -e "${ORANGE}Please, provide the email for the ${CYAN}$1${ORANGE} $2:${NC}"
+    read EMAIL  
   fi
 }
 
@@ -178,9 +191,7 @@ setup_files()
     echo "Setting up database user..."
     sed -i "s/'YOUR-USER'/'${BBDD}'/g" ${FILE}
 
-    if [ -z "$PASS"]; then    
-      pwd_req "postgresql database user"              
-    fi     
+    pwd_req "postgresql database user"              
 
     echo "Setting up database host..."
     sed -i "s/'YOUR-HOST'/'localhost'/g" ${FILE}
@@ -192,9 +203,7 @@ setup_files()
     sed -i "s/'YOUR-PASSWORD'/'${PASS}'/g" ${FILE}
         
     echo "Setting up the allowed hosts..."     
-    if [ -z "$HOST" ]; then    
-      host_req
-    fi
+    host_req
     sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}'\]/g" /var/www/teaching-stats/home/settings.py      
 
     touch $MARK
@@ -223,13 +232,9 @@ setup_django()
     
     echo ""    
     echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django superuser:${NC}"
-    if [ -z "$PASS" ]; then    
-      #if the bbdd already exists, the password must be provided
-      pwd_req "django superuser"
-    fi
+    pwd_req "django superuser"
     
-    echo -e "${ORANGE}Please, provide the email for the ${CYAN}${BBDD}${ORANGE} django superuser:${NC}"
-    read EMAIL          
+    email_req ${BBDD} "django superuser"    
     echo ""
 
     DJANGO_SUPERUSER_PASSWORD=${PASS} \
@@ -251,14 +256,10 @@ setup_gauth()
     URL="http://${HOST}:8000"
 
     echo -e "${LCYAN}Setting up Google Authentication:${NC}"
-    if [ -z "$HOST" ]; then    
-      host_req
-      echo ""
-    fi    
+    host_req
+    echo ""
 
-    if [ -z "$EMAIL" ]; then    
-      EMAIL="<your email>"
-    fi
+    email_req "Google" "user account"    
 
     echo -e "    1. Visit the Google Developers Console at ${CYAN}https://console.developers.google.com/projectcreate${NC} and log in with your Google account."
     echo -e "        1.1. Project name: ${CYAN}${BBDD}${NC}"
@@ -365,9 +366,7 @@ populate()
     read CONTINUE    
 
     if [ "$CONTINUE" == "y" ]; then
-      if [ -z "$PASS" ]; then    
-        pwd_req "${BBDD} database user"
-      fi
+      pwd_req "${BBDD} database user"
 
       echo ""  
       echo -e "${LCYAN}Setting up the ${CYAN}${FILE}${LCYAN} connection file:${NC}"    
@@ -440,10 +439,8 @@ metabase_env()
     echo ":msg,contains,\"metabase\" ${FILE_LOG} & stop" >> ${FILE_CON}
 
     FILE_CON="/etc/rsyslog.conf"
-    if [ -z "$LXD" ]; then    
-      lxd_req    
-    fi
     
+    lxd_req        
     if [ "$LXD"="TRUE" ]; then    
       sed -i "s/module(load=\"imklog\"/#module(load=\"imklog\"/g" ${FILE_CON}
     else
@@ -505,9 +502,7 @@ metabase_service()
     echo -e "   Creating the execution script for the current ${LCYAN}${USER}${NC} instance..."
     touch $FILE
     
-    if [ -z "$PASS" ]; then    
-      pwd_req "${BBDD} database user"
-    fi
+    pwd_req "${BBDD} database user"
 
     echo "#!/bin/bash" >> ${FILE}
     echo "cd /opt/metabase" >> ${FILE}
@@ -555,82 +550,47 @@ metabase_service()
   fi
 }
 
-
 metabase_setup()
 {
   MARK="$DIR/metabase-setup.done"
+  FILE="/opt/metabase/metabase-postgres.sh"
+  FOLDER=/tmp/teaching-stats
+  DUMP=$FOLDER/metabase.sql
   USER="metabase"
+  
 
   echo ""  
   if ! [ -f "$MARK" ]; then      
-    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"
-    sudo systemctl start metabase.service
-    sleep 5 #wait a bit for the service to start TODO: wait till the service is ready
+    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"  
    
     host_req
-    if [ -z "$PASS" ]; then    
-      pwd_req "${BBDD} database user"
-    fi
-    
-    echo -e "    1. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000${NC} (first load can take a while, so please, be patient)."
-    echo -e "        1.1. Choose your language."    
-    echo -e "    2. Fill your personal data."    
-    echo -e "        2.1. Please, do not forget your password."    
-    echo -e "    3. Choose ${CYAN}PostgreSQL${NC} as the current database."
-    echo -e "        3.1. Choose ${CYAN}PostgreSQL${NC} as the current database."
-    echo -e "        3.2. Set ${CYAN}${BBDD}${NC} as the display name."
-    echo -e "        3.3. Set ${CYAN}localhost${NC} as the server name."
-    echo -e "        3.4. Set ${CYAN}5432${NC} as the server port."
-    echo -e "        3.5. Set ${CYAN}${BBDD}${NC} as the database name."
-    echo -e "        3.6. Set ${CYAN}${BBDD}${NC} as the database username."
-    echo -e "        3.7. Set ${CYAN}${PASS}${NC} as the database password."
-    echo -e "        3.8. Other data can be let with the default values."
-    echo -e "    4. Choose if you want to share your anonymous data with the metabase staff."
-    echo -e "    5. Choose if you want to subscribe to the metabase mailing list."
-    echo -e "    6. Save your changes finishing the wizard."
-    echo 
-    echo -e "Once completed the previous configuration, ${ORANGE}press any key to continue...${NC}"
-    read 
+    pwd_req "${BBDD} database user"    
+    email_req "metabase" "admin user"
 
-    sudo systemctl stop metabase.service
+    mkdir -p $FOLDER
+    cp -f resources/metabase.sql $DUMP        
+
+    sed -i "s/###PSQLPWD###/${PASS}/g" ${DUMP}
+    sed -i "s/admin@admin.com/${EMAIL}/g" ${DUMP}
+
+    runuser -l postgres -c "psql -v ON_ERROR_STOP=1 -d \"${METABASE}\" -e < ${DUMP}"
+
+    sed -i "s/-jar metabase.jar/-jar metabase.jar reset-password ${EMAIL}/g" ${FILE}
+    RESULT=$(bash ${FILE})
+    
+    sed -i "s/-jar metabase.jar reset-password ${EMAIL}/-jar metabase.jar/g" ${FILE}
+    sudo systemctl start metabase.service
+    sleep 10  
+
+    echo
+    echo -e "    1. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000/auth/reset_password/:token${NC} (first load can take a while, so please, be patient)."
+    echo -e "    2. Set your new ${CYAN}metabase admin password${NC}."    
+    echo 
+    echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
+
     touch $MARK
   else
     echo -e "${CYAN}The metabase ${LCYAN}${USER}${CYAN} instance is already setup, skipping...${NC}"
-  fi
-}
-
-metabase_populate()
-{
-  MARK="$DIR/metabase-populate.done"  
-  #FILE=".pgpass"
-  METABASE="${BBDD}-metabase"
-
-  if ! [ -f "$MARK" ]; then              
-    echo 
-    echo -e "${LCYAN}Populating metabase dashboards data within the ${CYAN}${METABASE}${LCYAN} database:${NC}"   
-    echo -e "    1. Go to the ${CYAN}resources${NC} folder."
-    echo -e "    2. Review the ${CYAN}metabase.sql${NC} file and perform any modification you need."
-    echo -e "    3. The ${CYAN}metabase.sql${NC} file will be loaded into the database, which will generate the dashboards with the survey results."
-    echo ""
-    echo -e "${ORANGE}Do you want to proceed loading the ${CYAN}dasboards${ORANGE} data into the ${CYAN}${METABASE}${ORANGE} database using the previous files?${NC} [y/N]"
-    read CONTINUE   
-   
-    if [ "$CONTINUE" == "y" ]; then
-      mkdir -p /tmp/teaching-stats
-      cp -f resources/metabase.sql /tmp/teaching-stats/metabase.sql               
-
-      echo 
-      echo -e "${CYAN}Importing the SQL dump into the ${LCYAN}${METABASE}${CYAN} database:${NC}" 
-      runuser -l postgres -c "psql -v ON_ERROR_STOP=1 -d \"${METABASE}\" -e < /tmp/teaching-stats/metabase.sql"
-    else
-      echo "Skipping..."  
-    fi
-
-    sudo systemctl start metabase.service
-    touch $MARK
-  else
-    echo 
-    echo -e "${CYAN}The ${LCYAN}${METABASE}${CYAN} database has been already populated, skipping...${NC}"
   fi
 }
 
@@ -677,15 +637,8 @@ metabase_env
 metabase_download
 metabase_bbdd
 metabase_service
-
-#TODO: pipulating the dashboards over an existing metabase instance is really complex due foreign keys
-#Proposal:
-#   1. Ask the user if wants a clean metabase install or the survey's one
-#   2. For option 1 -> use the current metabase_setup method
-#   3. For option 2 -> ask the user for data, replace the dump, and restore the dump. After that, run the password reset.
-
-metabase_setup     #metabase pass during testing -> 5K6bZ5JARm7wxe
-metabase_populate
+metabase_setup
+#TODO: setup should load a metabase BBDD with no data. Populating the data should be optional.
 
 trap : 0
 echo ""
