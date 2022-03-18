@@ -572,8 +572,6 @@ metabase_setup()
       pwd_req "${BBDD} database user"
     fi
     
-    #metabase pass -> 5K6bZ5JARm7wxe
-
     echo -e "    1. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000${NC} (first load can take a while, so please, be patient)."
     echo -e "        1.1. Choose your language."    
     echo -e "    2. Fill your personal data."    
@@ -594,6 +592,7 @@ metabase_setup()
     echo -e "Once completed the previous configuration, ${ORANGE}press any key to continue...${NC}"
     read 
 
+    sudo systemctl stop metabase.service
     touch $MARK
   else
     echo -e "${CYAN}The metabase ${LCYAN}${USER}${CYAN} instance is already setup, skipping...${NC}"
@@ -604,33 +603,45 @@ metabase_setup()
 metabase_populate()
 {
   MARK="$DIR/metabase-populate.done"  
-  FILE=".pgpass"
+  #FILE=".pgpass"
   METABASE="${BBDD}-metabase"
 
   if ! [ -f "$MARK" ]; then              
     echo 
-    echo -e "${CYAN}Setting up the ${LCYAN}metabase${CYAN} databse resources:${NC}"    
-    rm -f ${FILE}
-    touch ${FILE}
+    echo -e "${LCYAN}Populating metabase dashboards data within the ${CYAN}${BBDD}${LCYAN} database:${NC}"   
+    echo -e "    1. Go to the ${CYAN}resources${NC} folder."
+    echo -e "    2. Review the metabase.sql file and perform any modification you need."
+    echo -e "    3. The metabase.sql file will be loaded into the database, which will generate the dashboards with the survey results."
+    echo ""
+    echo -e "${ORANGE}Do you want to proceed loading the ${CYAN}dasboards${ORANGE} data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC} [y/N]"
+    read CONTINUE   
+    # rm -f ${FILE}
+    # touch ${FILE}
 
-    if [ -z "$PASS" ]; then    
-      pwd_req "${BBDD} database user"
-    fi    
-    echo "localhost:5432:${METABASE}:${BBDD}:${PASS}" >> ${FILE}
-    chmod 0600 ${FILE}
-    export PGPASSFILE=$HOME/${PWD##*/}/${FILE}
+    # if [ -z "$PASS" ]; then    
+    #   pwd_req "${BBDD} database user"
+    # fi    
+    # echo "localhost:5432:${METABASE}:${BBDD}:${PASS}" >> ${FILE}
+    # chmod 0600 ${FILE}
+    # export PGPASSFILE=$HOME/${PWD##*/}/${FILE}
 
-    mkdir -p /tmp/teaching-stats
-    cp -f resources/metabase.sql /tmp/teaching-stats/metabase.sql               
+    if [ "$CONTINUE" == "y" ]; then
+      mkdir -p /tmp/teaching-stats
+      cp -f resources/metabase.sql /tmp/teaching-stats/metabase.sql               
 
-    echo 
-    echo -e "${CYAN}Importing the SQL Dump into the ${LCYAN}metabase${CYAN} database:${NC}" 
-    psql -e -h localhost -U "${BBDD}" -d "${METABASE}" < /tmp/teaching-stats/metabase.sql
+      echo 
+      echo -e "${CYAN}Importing the SQL dump into the ${LCYAN}${BBDD}${CYAN} database:${NC}" 
+      #psql -e -h localhost -U "${BBDD}" -d "${METABASE}" < /tmp/teaching-stats/metabase.sql
+      runuser -l postgres -c "psql -d \"${BBDD}\" -e < /tmp/teaching-stats/metabase.sql"
+    else
+      echo "Skipping..."  
+    fi
 
+    sudo systemctl start metabase.service
     touch $MARK
   else
     echo 
-    echo -e "${CYAN}The ${LCYAN}${USER}${CYAN} database already exists, skipping...${NC}"
+    echo -e "${CYAN}The ${LCYAN}${BBDD}${CYAN} database has been already populated, skipping...${NC}"
   fi
 }
 
@@ -677,8 +688,8 @@ metabase_env
 metabase_download
 metabase_bbdd
 metabase_service
-metabase_setup
-#metabase_populate
+metabase_setup     #metabase pass during testing -> 5K6bZ5JARm7wxe
+metabase_populate
 
 trap : 0
 echo ""
