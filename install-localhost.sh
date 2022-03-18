@@ -85,6 +85,7 @@ pwd_req()
 {  
   if [ -z "$PASS" ]; then    
     while true; do        
+      echo
       echo -e "${ORANGE}Please, provide the password for the ${CYAN}${BBDD}${ORANGE} ${1}:${NC}"
       read -s PASS
 
