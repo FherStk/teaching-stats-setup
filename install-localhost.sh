@@ -597,12 +597,15 @@ metabase_setup()
     pwd_req "${BBDD} database user"    
     email_req "metabase" "admin user"
 
-    echo "   Resetting the admin password..."
+    echo "   Preparing the reset token for the admin password, it can take a while..."
     sed -i "s/-jar metabase.jar/-jar metabase.jar reset-password ${EMAIL}/g" ${FILE}
     RESULT=$(bash ${FILE})
-    echo $RESULT
     
-    echo "   Starting metabase, the first load can take a while, so please, be patient..."
+    #WARNING: sun.reflect.Reflection.getCallerClass is not supported. This will impact performance. 2022-03-25 16:49:43,957 INFO metabase.util :: Maximum memory available to JVM: 1.9 GB 2022-03-25 16:49:53,814 INFO util.encryption :: Saved credentials encryption is DISABLED for this Metabase instance. 🔓 For more information, see https://metabase.com/docs/latest/operations-guide/encrypting-database-details-at-rest.html 2022-03-25 16:49:56,409 INFO driver.impl :: Registered abstract driver :sql 🚚  ⮦ Load driver :sql took 532.9 ms 2022-03-25 16:49:56,416 INFO driver.impl :: Registered abstract driver :sql-jdbc (parents: [:sql]) 🚚 Load driver :sql-jdbc took 545.1 ms 2022-03-25 16:49:56,419 INFO driver.impl :: Registered driver :h2 (parents: [:sql-jdbc]) 🚚 2022-03-25 16:49:56,434 INFO driver.impl :: Registered driver :mysql (parents: [:sql-jdbc]) 🚚 2022-03-25 16:49:56,446 INFO driver.impl :: Registered driver :postgres (parents: [:sql-jdbc]) 🚚 2022-03-25 16:49:58,337 INFO metabase.core :: Metabase v0.42.2 (d6ff494 release-x.42.x) Copyright © 2022 Metabase, Inc. Metabase Enterprise Edition extensions are NOT PRESENT. 2022-03-25 16:49:58,364 INFO db.setup :: Verifying postgres Database Connection ... 2022-03-25 16:49:58,612 INFO db.setup :: Successfully verified PostgreSQL 12.9 (Ubuntu 12.9-0ubuntu0.20.04.1) application database connection. ✅ 2022-03-25 16:49:58,613 INFO db.setup :: Running Database Migrations... 2022-03-25 16:49:58,644 INFO db.setup :: Setting up Liquibase... 2022-03-25 16:49:58,705 INFO db.setup :: Liquibase is ready. 2022-03-25 16:49:58,705 INFO db.liquibase :: Checking if Database has unrun migrations... 2022-03-25 16:50:00,145 INFO db.liquibase :: Database has unrun migrations. Waiting for migration lock to be cleared... 2022-03-25 16:50:00,157 INFO db.liquibase :: Migration lock is cleared. Running migrations... 2022-03-25 16:50:00,176 INFO db.setup :: Database Migrations Current ... ✅ 2022-03-25 16:50:00,195 INFO db.data-migrations :: Running all necessary data migrations, this may take a minute. 2022-03-25 16:50:00,225 INFO db.data-migrations :: Finished running data migrations. Database setup took 1.9 s Resetting password for porrino.fernando@elpuig.xeill.net... 2022-03-25 16:50:00,522 INFO driver.impl :: Initializing driver :sql... 2022-03-25 16:50:00,522 INFO driver.impl :: Initializing driver :sql-jdbc... 2022-03-25 16:50:00,522 INFO driver.impl :: Initializing driver :postgres... OK [[[1_4d66e040-5143-4666-8fbb-4f97b715678e]]]
+    #TODO: extract the token from the previous text, within -> [[[1_4d66e040-5143-4666-8fbb-4f97b715678e]]]
+
+    
+    echo "   Starting metabase, please wait..."
     sed -i "s/-jar metabase.jar reset-password ${EMAIL}/-jar metabase.jar/g" ${FILE}
     sudo systemctl start metabase.service
     sleep 10  #TODO: should wait till metabase is ready
