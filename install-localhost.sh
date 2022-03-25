@@ -551,10 +551,9 @@ metabase_service()
   fi
 }
 
-metabase_setup()
+metabase_populate()
 {
-  MARK="$DIR/metabase-setup.done"
-  FILE="/opt/metabase/metabase-postgres.sh"
+  MARK="$DIR/metabase-populate.done"
   FOLDER=/tmp/teaching-stats
   DUMP=$FOLDER/metabase.sql
   USER="metabase"
@@ -562,7 +561,7 @@ metabase_setup()
 
   echo ""  
   if ! [ -f "$MARK" ]; then      
-    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"  
+    echo -e "${CYAN}Populating the ${LCYAN}${USER}${CYAN} database:${NC}"  
    
     host_req
     pwd_req "${BBDD} database user"    
@@ -574,7 +573,29 @@ metabase_setup()
     sed -i "s/###PSQLPWD###/${PASS}/g" ${DUMP}
     sed -i "s/admin@admin.com/${EMAIL}/g" ${DUMP}
 
-    runuser -l postgres -c "psql -v ON_ERROR_STOP=1 -d \"${METABASE}\" -e < ${DUMP}"
+    runuser -l postgres -c "psql -v ON_ERROR_STOP=1 -d \"${METABASE}\" -e < ${DUMP}"    
+
+    touch $MARK
+  else
+    echo -e "${CYAN}The metabase ${LCYAN}${USER}${CYAN} database has been already populated, skipping...${NC}"
+  fi
+}
+
+metabase_setup()
+{
+  MARK="$DIR/metabase-setup.done"
+  FILE="/opt/metabase/metabase-postgres.sh"
+  FOLDER=/tmp/teaching-stats
+  USER="metabase"
+  
+
+  echo ""  
+  if ! [ -f "$MARK" ]; then      
+    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"  
+   
+    host_req
+    pwd_req "${BBDD} database user"    
+    email_req "metabase" "admin user"
 
     sed -i "s/-jar metabase.jar/-jar metabase.jar reset-password ${EMAIL}/g" ${FILE}
     RESULT=$(bash ${FILE})
@@ -588,6 +609,7 @@ metabase_setup()
     echo -e "    2. Set your new ${CYAN}metabase admin password${NC}."    
     echo 
     echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
+    read CONTINUE    
 
     touch $MARK
   else
@@ -638,6 +660,7 @@ metabase_env
 metabase_download
 metabase_bbdd
 metabase_service
+metabase_populate
 metabase_setup
 #TODO: setup should load a metabase BBDD with no data. Populating the data should be optional.
 
