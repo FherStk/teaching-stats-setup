@@ -597,15 +597,18 @@ metabase_setup()
     pwd_req "${BBDD} database user"    
     email_req "metabase" "admin user"
 
+    echo "   Resetting the admin password..."
     sed -i "s/-jar metabase.jar/-jar metabase.jar reset-password ${EMAIL}/g" ${FILE}
     RESULT=$(bash ${FILE})
+    echo $RESULT
     
+    echo "   Starting metabase, the first load can take a while, so please, be patient..."
     sed -i "s/-jar metabase.jar reset-password ${EMAIL}/-jar metabase.jar/g" ${FILE}
     sudo systemctl start metabase.service
     sleep 10  #TODO: should wait till metabase is ready
 
     echo
-    echo -e "    1. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000/auth/reset_password/:token${NC} (first load can take a while, so please, be patient)."
+    echo -e "    1. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000/auth/reset_password/:token${NC}"
     echo -e "    2. Set your new ${CYAN}metabase admin password${NC}."    
     echo 
     echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
