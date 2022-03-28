@@ -556,8 +556,7 @@ metabase_populate()
   MARK="$DIR/metabase-populate.done"
   FOLDER=/tmp/teaching-stats
   DUMP=$FOLDER/metabase.sql
-  USER="metabase"
-  
+  USER="metabase"  
 
   echo ""  
   if ! [ -f "$MARK" ]; then      
@@ -614,10 +613,37 @@ metabase_setup()
     echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
     read CONTINUE    
 
+    sudo systemctl stop metabase.service
     touch $MARK
   else
     echo -e "${CYAN}The metabase ${LCYAN}${USER}${CYAN} instance is already setup, skipping...${NC}"
   fi
+}
+
+metabase_dashboards()
+{
+  MARK="$DIR/metabase-dashboards.done"
+  FOLDER="/var/www/teaching-stats/templates/alaytics"
+  URL="http://localhost/public/dashboard/"
+  USER="metabase"  
+
+  echo ""  
+  if ! [ -f "$MARK" ]; then      
+    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} dashboards:${NC}"  
+   
+    sed -i "s|YOUR-DASHBOARD-SHARED-URL|${URL}/db3ef531-8f78-4d92-91e6-f2055f38acb9|g" ${FOLDER}/adm_analytics.html
+    sed -i "s|YOUR-DASHBOARD-SHARED-URL|${URL}/347ad7db-6067-4471-aff9-c9dcfb0f9140|g" ${FOLDER}/school_analytics.html
+    sed -i "s|YOUR-DASHBOARD-SHARED-URL|${URL}/d83e1ccb-bc1a-4c70-8695-f1619f0b8434|g" ${FOLDER}/inf_analytics.html
+    sed -i "s|YOUR-DASHBOARD-SHARED-URL|${URL}/4cd9feed-60ca-4e43-8456-16ba64b2157c|g" ${FOLDER}/subject_analytics.html
+    sed -i "s|YOUR-DASHBOARD-SHARED-URL|${URL}/e8f9c352-0aca-4508-a766-d866e7de133a|g" ${FOLDER}/counseling_analytics.html
+    
+    touch $MARK
+  else
+    echo -e "${CYAN}The metabase ${LCYAN}${USER}${CYAN} dashboards has been already setup, skipping...${NC}"
+  fi
+
+  #Always starts metabase
+  sudo systemctl start metabase.service
 }
 
 
@@ -665,8 +691,9 @@ metabase_bbdd
 metabase_service
 metabase_populate
 metabase_setup
-#TODO: setup should load a metabase BBDD with no data. Populating the data should be optional.
+metabase_dashboards
+#TODO: setup should load a metabase BBDD with no data. Populating the data should be optional. Also including default dashboards.
 
 trap : 0
 echo ""
-echo -e "${GREEN}Done!${NC}" 
+echo -e "${GREEN}Done! Use the start script to run the app.${NC}" 
