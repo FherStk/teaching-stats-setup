@@ -630,11 +630,20 @@ metabase_dashboards()
   echo ""  
   if ! [ -f "$MARK" ]; then      
     echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} dashboards:${NC}"  
-   
-    sed -i "s|YOUR-DASHBOARD-SHARED-URL|${URL}/db3ef531-8f78-4d92-91e6-f2055f38acb9|g" ${FOLDER}/adm_analytics.html
+
+    echo "   School analytics..."
     sed -i "s|YOUR-DASHBOARD-SHARED-URL|${URL}/347ad7db-6067-4471-aff9-c9dcfb0f9140|g" ${FOLDER}/school_analytics.html
+    
+    echo "   Administration analytics..."
+    sed -i "s|YOUR-DASHBOARD-SHARED-URL|${URL}/db3ef531-8f78-4d92-91e6-f2055f38acb9|g" ${FOLDER}/adm_analytics.html
+  
+    echo "   Computer science analytics..."
     sed -i "s|YOUR-DASHBOARD-SHARED-URL|${URL}/d83e1ccb-bc1a-4c70-8695-f1619f0b8434|g" ${FOLDER}/inf_analytics.html
+
+    echo "   Subject analytics..."
     sed -i "s|YOUR-DASHBOARD-SHARED-URL|${URL}/4cd9feed-60ca-4e43-8456-16ba64b2157c|g" ${FOLDER}/subject_analytics.html
+
+    echo "   Counseling analytics..."
     sed -i "s|YOUR-DASHBOARD-SHARED-URL|${URL}/e8f9c352-0aca-4508-a766-d866e7de133a|g" ${FOLDER}/counseling_analytics.html
     
     touch $MARK
