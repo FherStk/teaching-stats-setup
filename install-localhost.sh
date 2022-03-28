@@ -623,7 +623,7 @@ metabase_setup()
 metabase_dashboards()
 {
   MARK="$DIR/metabase-dashboards.done"
-  FOLDER="/var/www/teaching-stats/templates/alaytics"
+  FOLDER="/var/www/teaching-stats/templates/analytics"
   URL="http://localhost/public/dashboard/"
   USER="metabase"  
 
