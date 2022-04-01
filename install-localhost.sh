@@ -205,7 +205,7 @@ setup_files()
         
     echo "Setting up the allowed hosts..."     
     host_req
-    sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}'\]/g" /var/www/teaching-stats/home/settings.py      
+    sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}','${BBDD}.com'\]/g" /var/www/teaching-stats/home/settings.py      
 
     touch $MARK
   else
@@ -288,24 +288,31 @@ setup_gauth()
     echo -e "        4.4. Name: ${CYAN}${BBDD}${NC}"
 
     if [ "$HOST"="127.0.0.1" ]; then                 
-      echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${HOST}${NC}"                    
-      echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${HOST}/google/login/callback/${NC}" 
+      echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${HOST}:8000${NC}"                    
+      echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${HOST}:8000/google/login/callback/${NC}" 
     else
-      echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${BBDD}.com${NC}"                   
-      echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${BBDD}.com/google/login/callback/${NC}"  
+      echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${BBDD}.com:8000${NC}"                   
+      echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${BBDD}.com:8000/google/login/callback/${NC}"        
     fi
 
     echo -e "        4.7. Press the ${CYAN}create${NC} button."
     echo -e "        4.8. Copy your ${CYAN}client id${NC} and ${CYAN}secret key${NC}, it will be required later."
+
+    if [ "$HOST"="127.0.0.1" ]; then                 
+      echo
+      echo -e "    5. In order to login using your Google credentials, edit your local ${CYAN}/etc/hosts${NC} file, otherwise, your browser won't be able to login."
+      echo -e "        5.1 Edit your local hosts file with ${CYAN}sudo nano /etc/hosts${NC} or the text editor you wish."
+      echo -e "        5.2 Add the follogin entry at the begining: ${CYAN}${HOST} ${BBDD}.com${NC}."
+      echo -e "        5.3 Save the changes."          
+    fi
+    
     echo ""
     echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
     read 
 
     if [ "$HOST"="127.0.0.1" ]; then                 
-      echo
-      echo "Please, in order to login using your Google credentials, edit your local ${CYAN}/etc/hosts${NC} file, otherwise, your browser won't be able to login."
-      echo
-      echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
+      #service network-manager restart 
+      systemctl restart systemd-hostnamed
     fi
 
     echo ""
@@ -318,15 +325,15 @@ setup_gauth()
 
     echo -e "    1. Visit the django's admin site ${CYAN}${URL}/admin${NC} and log in as ${CYAN}${BBDD}${NC} superuser."
     echo -e "    2. Go to Sites → Site → Add site. Set it up:"
-    echo -e "        Domain name: ${CYAN}${URL}${NC}"
-    echo -e "        Display name: ${CYAN}${URL}${NC}"
+    echo -e "        Domain name: ${CYAN}${BBDD}.com:8000${NC}"
+    echo -e "        Display name: ${CYAN}${BBDD}${NC}"
     echo -e "    3. Go to Social accounts → Social applications → Add social application. Set it up:"
     echo -e "        Provider: ${CYAN}Google${NC}"
     echo -e "        Name: ${CYAN}google-api${NC}"
     echo -e "        Client id: ${CYAN}<your client id>${NC}"
     echo -e "        Secret key: ${CYAN}<your secret key>${NC}"
     echo -e "        You can leave the ${CYAN}key${NC} field empty."
-    echo -e "    4. Add ${CYAN}${HOST}:8000${NC} and ${CYAN}example.com${NC} to Chosen sites and save the new settings."
+    echo -e "    4. Add ${CYAN}${HOST}.com:8000${NC} and ${CYAN}example.com${NC} to Chosen sites and save the new settings."
     echo ""
     echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
     read 
