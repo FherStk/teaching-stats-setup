@@ -51,9 +51,12 @@ elif [ "$MODE" == "staff" ]; then
     if [ "$OPTION" == "add" ]; then        
         NAME=${4}
         SURNAME=${5}    
+        
         runuser -l postgres -c "psql -d \"${BBDD}\" -c 'INSERT INTO reports.staff (email, name, surname, position) VALUES('\'${EMAIL}\'', '\'${NAME}\'', '\'${SURNAME}\'', (SELECT COUNT(id)+1 FROM reports.staff));'"
+        echo -e "${GREEN}Done!${NC}" 
     elif [ "$OPTION" == "remove" ]; then
         runuser -l postgres -c "psql -d \"${BBDD}\" -c 'DELETE FROM reports.staff WHERE email='\'${EMAIL}\'';'"
+        echo -e "${GREEN}Done!${NC}" 
     else
         options
     fi
