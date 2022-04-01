@@ -279,20 +279,34 @@ setup_gauth()
     echo -e "        3.5. Press the ${CYAN}save and continue${NC} button."
     echo -e "        3.6. Press the ${CYAN}save and continue${NC} button."
     echo -e "        3.7. Press the ${CYAN}save and continue${NC} button."
-    echo -e "        3.8. Press the ${CYAN}return to panel${NC} button."
+    echo -e "        3.8. Press the ${CYAN}return to panel${NC} button."    
     echo ""
     echo -e "    4. At the left panel, go to: ${CYAN}API and services -> Credentials${NC}"
     echo -e "        4.1. Press the ${CYAN}create credentials${NC} button."
     echo -e "        4.2. Select the ${CYAN}OAuth client ID${NC} option."
     echo -e "        4.3. Application type: ${CYAN}Web application${NC}"
     echo -e "        4.4. Name: ${CYAN}${BBDD}${NC}"
-    echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}${URL}${NC}"
-    echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}${URL}/google/login/callback/${NC}"
+
+    if [ "$HOST"="127.0.0.1" ]; then                 
+      echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${HOST}${NC}"                    
+      echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${HOST}/google/login/callback/${NC}" 
+    else
+      echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${BBDD}.com${NC}"                   
+      echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${BBDD}.com/google/login/callback/${NC}"  
+    fi
+
     echo -e "        4.7. Press the ${CYAN}create${NC} button."
     echo -e "        4.8. Copy your ${CYAN}client id${NC} and ${CYAN}secret key${NC}, it will be required later."
     echo ""
     echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
     read 
+
+    if [ "$HOST"="127.0.0.1" ]; then                 
+      echo
+      echo "Please, in order to login using your Google credentials, edit your local ${CYAN}/etc/hosts${NC} file, otherwise, your browser won't be able to login."
+      echo
+      echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
+    fi
 
     echo ""
     echo -e "${LCYAN}Setting up django's social account:${NC}"
@@ -312,7 +326,7 @@ setup_gauth()
     echo -e "        Client id: ${CYAN}<your client id>${NC}"
     echo -e "        Secret key: ${CYAN}<your secret key>${NC}"
     echo -e "        You can leave the ${CYAN}key${NC} field empty."
-    echo -e "    4. Add ${CYAN}${HOST}:8000${NC} to Chosen sites and save the new settings."
+    echo -e "    4. Add ${CYAN}${HOST}:8000${NC} and ${CYAN}example.com${NC} to Chosen sites and save the new settings."
     echo ""
     echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
     read 
