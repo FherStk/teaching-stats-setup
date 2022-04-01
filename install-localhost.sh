@@ -645,7 +645,7 @@ metabase_dashboards()
 {
   MARK="$DIR/metabase-dashboards.done"
   FOLDER="/var/www/teaching-stats/templates/analytics"
-  URL="http://localhost/public/dashboard/"
+  URL="http://${HOST}/public/dashboard/"
   USER="metabase"  
 
   echo ""  
