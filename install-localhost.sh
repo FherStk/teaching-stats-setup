@@ -384,32 +384,28 @@ populate()
     echo -e "    2. Review each $1 file and perform any modification you need."
     echo -e "    3. Each $1 file will be loaded and its data will be pupulated through the database."
     echo ""
-    echo -e "${ORANGE}Do you want to proceed loading the ${CYAN}$1${ORANGE} data into the ${CYAN}${BBDD}${ORANGE} database using the previous files?${NC} [y/N]"
+    echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
     read CONTINUE    
 
-    if [ "$CONTINUE" == "y" ]; then
-      pwd_req "${BBDD} database user"
+    pwd_req "${BBDD} database user"
 
-      echo ""  
-      echo -e "${LCYAN}Setting up the ${CYAN}${FILE}${LCYAN} connection file:${NC}"    
-      touch ${FILE}
-      echo "[postgresql]" >> ${FILE}
-      echo "host=${LOCALHOST}" >> ${FILE}
-      echo "database=${BBDD}" >> ${FILE}
-      echo "user=${BBDD}" >> ${FILE}
-      echo "password=${PASS}" >> ${FILE}
-      echo "port=${PSQL_PORT}" >> ${FILE}
-      echo "options=-c search_path=dbo,master" >> ${FILE}
-      echo "File successfully created."
+    echo ""  
+    echo -e "${LCYAN}Setting up the ${CYAN}${FILE}${LCYAN} connection file:${NC}"    
+    touch ${FILE}
+    echo "[postgresql]" >> ${FILE}
+    echo "host=${LOCALHOST}" >> ${FILE}
+    echo "database=${BBDD}" >> ${FILE}
+    echo "user=${BBDD}" >> ${FILE}
+    echo "password=${PASS}" >> ${FILE}
+    echo "port=${PSQL_PORT}" >> ${FILE}
+    echo "options=-c search_path=dbo,master" >> ${FILE}
+    echo "File successfully created."
 
-      echo ""  
-      echo -e "${LCYAN}Starting the ${CYAN}${BBDD}${LCYAN} database population for $1 data:${NC}"    
-      cd ${FOLDER}      
-      python3 $3
-      cd ..
-    else
-      echo "Skipping..."  
-    fi
+    echo ""  
+    echo -e "${LCYAN}Starting the ${CYAN}${BBDD}${LCYAN} database population for $1 data:${NC}"    
+    cd ${FOLDER}      
+    python3 $3
+    cd ..
 
     touch $MARK
   else
@@ -572,16 +568,16 @@ metabase_service()
   fi
 }
 
-metabase_populate()
+metabase_master()
 {
-  MARK="$DIR/metabase-populate.done"
+  MARK="$DIR/metabase-master.done"
   FOLDER=/tmp/teaching-stats
   DUMP=$FOLDER/metabase.sql
   USER="metabase"  
 
   echo ""  
   if ! [ -f "$MARK" ]; then      
-    echo -e "${CYAN}Populating the ${LCYAN}${USER}${CYAN} database:${NC}"  
+    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} database:${NC}"  
    
     host_req
     pwd_req "${BBDD} database user"    
@@ -597,7 +593,7 @@ metabase_populate()
 
     touch $MARK
   else
-    echo -e "${CYAN}The metabase ${LCYAN}${USER}${CYAN} database has been already populated, skipping...${NC}"
+    echo -e "${CYAN}The metabase ${LCYAN}${USER}${CYAN} database has been already setup, skipping...${NC}"
   fi
 }
 
@@ -719,10 +715,9 @@ metabase_env
 metabase_download
 metabase_bbdd
 metabase_service
-metabase_populate
+metabase_master #TODO: metabase_master loads the master data but no data about answers.
 metabase_setup
 metabase_dashboards
-#TODO: setup should load a metabase BBDD with no data. Populating the data should be optional. Also including default dashboards.
 
 trap : 0
 echo ""
