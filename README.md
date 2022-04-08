@@ -16,5 +16,9 @@ The project is still under development and has not been completed yet. Please, r
 1. In order to open, run: `sudo ./config.sh survey open`
 1. In order to close, run: `sudo ./config.sh survey close`
 
+## How to add/remove users with access to the survey results
+1. In order to add, run: `sudo ./config.sh staff add <email> <name> <surname>`
+1. In order to remove, run: `sudo ./config.sh staff remove <email>`
+
 ## How to start the survey server
 1. In order to start, run: `sudo ./start.sh`
