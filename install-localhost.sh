@@ -333,7 +333,7 @@ setup_gauth()
     echo -e "        Client id: ${CYAN}<your client id>${NC}"
     echo -e "        Secret key: ${CYAN}<your secret key>${NC}"
     echo -e "        You can leave the ${CYAN}key${NC} field empty."
-    echo -e "    4. Add ${CYAN}${HOST}.com:8000${NC} and ${CYAN}example.com${NC} to Chosen sites and save the new settings."
+    echo -e "    4. Add ${CYAN}${BBDD}.com:8000${NC} and ${CYAN}example.com${NC} to Chosen sites and save the new settings."
     echo ""
     echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
     read 
