@@ -23,10 +23,12 @@ echo
 echo -e "${CYAN}You can access to the survey system through:${NC}"
 echo "    http://${IPv4}:8000/"
 echo "    http://127.0.0.1:8000/"
+echo "    http://teaching-stats.com:8000/"
 echo 
 echo -e "${CYAN}You can access to the survey stats through:${NC}"
 echo "    http://${IPv4}:8000/resultats"
 echo "    http://127.0.0.1:8000/resultats"
+echo "    http://teaching-stats.com:8000/resultats"
 echo 
 
 cd /var/www/teaching-stats

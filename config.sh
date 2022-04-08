@@ -17,6 +17,8 @@ options()
     echo "Avaliable options are:"
     echo "   survey open: opens the survey season."
     echo "   survey close: closes the survey season."
+    echo "   staff add <email> <name> <surname>: adds a new staff member, so he/she will be able to access to the survey results."
+    echo "   staff remove <email>: removes a staff member, so he/she will not be able to access to the survey results."
     echo
 }
 
@@ -42,6 +44,22 @@ if [ "$MODE" == "survey" ]; then
         options
     fi
 
+elif [ "$MODE" == "staff" ]; then
+    EMAIL=${3}
+    BBDD='teaching-stats'
+    
+    if [ "$OPTION" == "add" ]; then        
+        NAME=${4}
+        SURNAME=${5}    
+        
+        runuser -l postgres -c "psql -d \"${BBDD}\" -c 'INSERT INTO reports.staff (email, name, surname, position) VALUES('\'${EMAIL}\'', '\'${NAME}\'', '\'${SURNAME}\'', (SELECT COUNT(id)+1 FROM reports.staff));'"
+        echo -e "${GREEN}Done!${NC}" 
+    elif [ "$OPTION" == "remove" ]; then
+        runuser -l postgres -c "psql -d \"${BBDD}\" -c 'DELETE FROM reports.staff WHERE email='\'${EMAIL}\'';'"
+        echo -e "${GREEN}Done!${NC}" 
+    else
+        options
+    fi
 else
     options
 fi
