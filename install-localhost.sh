@@ -241,7 +241,7 @@ setup_django()
     DJANGO_SUPERUSER_PASSWORD=${PASS} \
     python3 manage.py createsuperuser --noinput --username ${BBDD} --email ${EMAIL}
 
-    cd $HOME/${CURRENT}
+    cd ${CURRENT}
     touch $MARK
   else
     echo -e "${CYAN}Django instance ${LCYAN}${FILE}${CYAN} setup already done, skipping...${NC}"
@@ -339,7 +339,7 @@ setup_gauth()
     read 
 
     kill $PID
-    cd $HOME/${CURRENT}
+    cd ${CURRENT}
     touch $MARK
 
   else
