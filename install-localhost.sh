@@ -221,7 +221,7 @@ setup_django()
   if ! [ -f "$MARK" ]; then    
     echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django instance:${NC}"
     
-    CURRENT=${PWD##*/}
+    CURRENT=${PWD}
     
     cd ${DIR}
     python3 manage.py makemigrations --noinput
@@ -317,7 +317,7 @@ setup_gauth()
 
     echo ""
     echo -e "${LCYAN}Setting up django's social account:${NC}"
-    CURRENT=${PWD##*/}
+    CURRENT=${PWD}
         
     cd ${DIR}
     python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use '0.0.0.0:8000' when running within a container, in order to allow remote connections
