@@ -160,6 +160,30 @@ collect_data()
     touch $MARK
   else
     echo -e "${CYAN}Setup ${LCYAN}${BBDD}${CYAN} data already collected, skipping...${NC}"
+    
+    #email and password will be loaded from the existing files, no promt nor output required
+    email_req
+    pwd_req    
+  fi
+}
+
+clean_data()
+{  
+  MARK="$DIR/collect-data.done"
+  MAILFILE="$DIR/setup-files.mail"
+  PWDFILE="$DIR/setup-files.pwd"
+
+  echo ""
+  if ! [ -f "$MARK" ]; then    
+    echo -e "${CYAN}No setup ${LCYAN}${BBDD}${CYAN} data has been collected, skipping...${NC}"
+  else    
+    echo -e "${LCYAN}Cleaning collected data for the ${CYAN}${BBDD}${LCYAN} ecosystem setup:${NC}"
+    
+    echo -e "Cleaning email..."
+    rm ${MAILFILE}
+
+    echo -e "Cleaning credentials..."
+    rm ${PWDFILE}
   fi
 }
 
@@ -182,7 +206,8 @@ bbdd_user()
   then          
     echo -e "${LCYAN}Creating the ${CYAN}${BBDD}${LCYAN} database user:${NC}"
     echo -e "A PostgreSQL user named ${CYAN}${BBDD}${NC} will be created into the ${CYAN}${BBDD}${NC} database, which will be its owner with all granted permissions."
-    
+    echo
+
     runuser -l postgres -c "psql -e -c 'CREATE USER \"${BBDD}\" WITH PASSWORD '\'${PASS}\'';'"
     runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${BBDD}\" OWNER TO \"${BBDD}\";'"
 
@@ -743,6 +768,8 @@ metabase_service
 metabase_master #TODO: metabase_master loads the master data but no data about answers.
 metabase_setup
 metabase_dashboards
+
+clean_data
 
 trap : 0
 echo ""
