@@ -19,7 +19,7 @@ LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
 BBDD='teaching-stats'
 DIR="/var/www/${BBDD}"
-LOCALHOST="127.0.0.1" #Used for local connections like django -> postgres
+LOCALHOST="127.0.0.1" #Used for local connections like Django -> postgres
 PSQL_PORT="5432"
 VERSION="0.0.5"
 PASS=''
@@ -83,44 +83,122 @@ lxd_req()
 
 pwd_req()
 {  
-  if [ -z "$PASS" ]; then    
-    while true; do        
-      echo
-      echo -e "${ORANGE}Please, provide the password for the ${CYAN}${BBDD}${ORANGE} ${1}:${NC}"
-      read -s PASS
+  if [ -z "$PASS" ]; then
+    FILE="$DIR/setup-files.pass"
 
-      echo -e "${ORANGE}Set the password (again):${NC}"
-      read -s PASS2
-      echo ""
+    if ! [ -f "$FILE" ]; then    
+      while true; do        
+        echo
+        echo -e "${ORANGE}Please, provide the password for all the applications involded into the ${CYAN}${BBDD}${ORANGE} setup:${NC}"
+        read -s PASS
 
-      [ "$PASS" = "$PASS2" ] && break
-      echo -e "${RED}Password missmatch, please try again.${NC}"
-      echo ""
-    done  
+        echo -e "${ORANGE}Set the password (again):${NC}"
+        read -s PASS2
+        echo ""
+
+        [ "$PASS" = "$PASS2" ] && break
+        echo -e "${RED}Password missmatch, please try again.${NC}"
+        echo ""
+      done  
+
+      touch $FILE
+      echo $PASS > $FILE
+    else
+      PASS=$(cat ${FILE})
+    fi    
   fi
 }
 
 host_req()
 {
   if [ -z "$HOST" ]; then    
-    echo
-    lxd_req    
+    FILE="$DIR/setup-files.host"
 
-    IPv4=$(hostname -I | cut -d' ' -f1)
-    if [ "$LXD"="TRUE" ]; then    
-      HOST=${IPv4}
+    if ! [ -f "$FILE" ]; then   
+      lxd_req    
+
+      IPv4=$(hostname -I | cut -d' ' -f1)
+      if [ "$LXD"="TRUE" ]; then    
+        HOST=${IPv4}
+      else
+        HOST=${LOCALHOST}
+      fi
+
+      touch $FILE
+      echo $HOST > $FILE
+
     else
-      HOST=${LOCALHOST}
-    fi
+      HOST=$(cat ${FILE})
+    fi   
   fi
 }
 
 email_req()
 {
   if [ -z "$EMAIL" ]; then    
+    FILE="$DIR/setup-files.mail"
+
+    if ! [ -f "$FILE" ]; then    
+      echo
+      echo -e "${ORANGE}Please, provide the email for all the applications involded into the ${CYAN}${BBDD}${ORANGE} setup:${NC}"
+      echo -e "${RED}Warning! This email will be attached to the Django superuser and won't be able to join (or review the results of) any survey.${NC}"
+      read EMAIL  
+      
+      touch $FILE
+      echo $EMAIL > $FILE
+    else
+      EMAIL=$(cat ${FILE})
+    fi  
+  fi 
+}
+
+collect_data()
+{  
+  MARK="$DIR/collect-data.done"
+
+  echo ""
+  if ! [ -f "$MARK" ]; then    
+    echo -e "${LCYAN}Collecting data for the ${CYAN}${BBDD}${LCYAN} ecosystem setup:${NC}"
+    echo -e "The ${LCYAN}${BBDD}${NC} setup relays on a bunch of applications that works together to provide a set of survey capabilities, in order to simplify the installation and configuration process, the same users, passwords and emails will be used along all the setup process."    
+
     echo
-    echo -e "${ORANGE}Please, provide the email for the ${CYAN}$1${ORANGE} $2:${NC}"
-    read EMAIL  
+    echo -e "The ${LCYAN}${BBDD}${NC} username will be used for all the applications involded into the ${LCYAN}${BBDD}${NC} setup."    
+    email_req
+    pwd_req    
+    host_req
+
+    touch $MARK
+  else
+    echo -e "${CYAN}Setup ${LCYAN}${BBDD}${CYAN} data already collected, skipping...${NC}"
+    
+    #data will be loaded from the existing files, no promt nor output required    
+    email_req
+    pwd_req    
+    host_req
+  fi
+}
+
+clean_data()
+{  
+  MARK="$DIR/collect-data.done"
+  HOSTFILE="$DIR/setup-files.host"
+  MAILFILE="$DIR/setup-files.mail"
+  PWDFILE="$DIR/setup-files.pass"
+
+  echo ""
+  if ! [ -f "$MARK" ]; then    
+    echo -e "${CYAN}No setup ${LCYAN}${BBDD}${CYAN} data has been collected, skipping...${NC}"
+  else    
+    echo -e "${LCYAN}Cleaning collected data for the ${CYAN}${BBDD}${LCYAN} ecosystem setup:${NC}"
+    
+    echo -e "Cleaning host..."
+    rm ${HOSTFILE}
+
+    echo -e "Cleaning email..."
+    rm ${MAILFILE}
+
+    echo -e "Cleaning credentials..."
+    rm ${PWDFILE}
   fi
 }
 
@@ -140,10 +218,11 @@ bbdd_user()
 {
   echo ""
   if [ $(runuser -l postgres -c "psql -c \"\\du ${BBDD}\" | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
-  then    
+  then          
     echo -e "${LCYAN}Creating the ${CYAN}${BBDD}${LCYAN} database user:${NC}"
-    pwd_req "postgresql database user"
-    
+    echo -e "A PostgreSQL user named ${CYAN}${BBDD}${NC} will be created into the ${CYAN}${BBDD}${NC} database, which will be its owner with all granted permissions."
+    echo
+
     runuser -l postgres -c "psql -e -c 'CREATE USER \"${BBDD}\" WITH PASSWORD '\'${PASS}\'';'"
     runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${BBDD}\" OWNER TO \"${BBDD}\";'"
 
@@ -185,14 +264,12 @@ setup_files()
 
   echo ""
   if ! [ -f "$MARK" ]; then    
-    echo -e "${LCYAN}Setting up the initial django data within ${CYAN}${FILE}${LCYAN}:${NC}"
+    echo -e "${LCYAN}Setting up the initial Django data within ${CYAN}${FILE}${LCYAN}:${NC}"
     echo "Setting up database name..."
     sed -i "s/'YOUR-DATABASE'/'${BBDD}'/g" ${FILE}
 
     echo "Setting up database user..."
     sed -i "s/'YOUR-USER'/'${BBDD}'/g" ${FILE}
-
-    pwd_req "postgresql database user"              
 
     echo "Setting up database host..."
     sed -i "s/'YOUR-HOST'/'localhost'/g" ${FILE}
@@ -204,7 +281,6 @@ setup_files()
     sed -i "s/'YOUR-PASSWORD'/'${PASS}'/g" ${FILE}
         
     echo "Setting up the allowed hosts..."     
-    host_req
     sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}','${BBDD}.com'\]/g" /var/www/teaching-stats/home/settings.py      
 
     touch $MARK
@@ -219,9 +295,9 @@ setup_django()
 
   echo ""  
   if ! [ -f "$MARK" ]; then    
-    echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django instance:${NC}"
+    echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} Django instance:${NC}"
     
-    CURRENT=${PWD##*/}
+    CURRENT=${PWD}
     
     cd ${DIR}
     python3 manage.py makemigrations --noinput
@@ -232,16 +308,14 @@ setup_django()
     python3 manage.py collectstatic --noinput
     
     echo ""    
-    echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django superuser:${NC}"
-    pwd_req "django superuser"
-    
-    email_req ${BBDD} "django superuser"    
+    echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} Django superuser:${NC}"
+    echo -e "A Django superuser named ${CYAN}${BBDD}${NC} will be created into the ${CYAN}${BBDD}${NC} Django instance, use this user to login into Django as an administrator."    
     echo ""
 
     DJANGO_SUPERUSER_PASSWORD=${PASS} \
     python3 manage.py createsuperuser --noinput --username ${BBDD} --email ${EMAIL}
 
-    cd $HOME/${CURRENT}
+    cd ${CURRENT}
     touch $MARK
   else
     echo -e "${CYAN}Django instance ${LCYAN}${FILE}${CYAN} setup already done, skipping...${NC}"
@@ -257,10 +331,7 @@ setup_gauth()
     URL="http://${HOST}:8000"
 
     echo -e "${LCYAN}Setting up Google Authentication:${NC}"
-    host_req
     echo ""
-
-    email_req "Google" "user account"    
 
     echo -e "    1. Visit the Google Developers Console at ${CYAN}https://console.developers.google.com/projectcreate${NC} and log in with your Google account."
     echo -e "        1.1. Project name: ${CYAN}${BBDD}${NC}"
@@ -316,14 +387,14 @@ setup_gauth()
     fi
 
     echo ""
-    echo -e "${LCYAN}Setting up django's social account:${NC}"
-    CURRENT=${PWD##*/}
+    echo -e "${LCYAN}Setting up Django's social account:${NC}"
+    CURRENT=${PWD}
         
     cd ${DIR}
     python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use '0.0.0.0:8000' when running within a container, in order to allow remote connections
     PID=$!  
 
-    echo -e "    1. Visit the django's admin site ${CYAN}${URL}/admin${NC} and log in as ${CYAN}${BBDD}${NC} superuser."
+    echo -e "    1. Visit the Django's admin site ${CYAN}${URL}/admin${NC} and log in as ${CYAN}${BBDD}${NC} superuser."
     echo -e "    2. Go to Sites → Site → Add site. Set it up:"
     echo -e "        Domain name: ${CYAN}${BBDD}.com:8000${NC}"
     echo -e "        Display name: ${CYAN}${BBDD}${NC}"
@@ -339,7 +410,7 @@ setup_gauth()
     read 
 
     kill $PID
-    cd $HOME/${CURRENT}
+    cd ${CURRENT}
     touch $MARK
 
   else
@@ -354,9 +425,9 @@ setup_site()
 
   echo ""  
   if ! [ -f "$MARK" ]; then    
-    echo -e "${LCYAN}Setting up the site django data within ${CYAN}${FILE}${LCYAN}:${NC}"
+    echo -e "${LCYAN}Setting up the site Django data within ${CYAN}${FILE}${LCYAN}:${NC}"
     echo "Setting up the site secret key..." 
-    SECRET=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
+    SECRET=$(python -c 'from Django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
     sed -i "s/'YOUR-SECRET-KEY'/'${SECRET}'/g" ${FILE}          
 
     ID=$(runuser -l postgres -c "psql -d \"${BBDD}\" -qtAX -c 'SELECT * FROM django_site WHERE name='\'${HOST}:8000\'';'")    
@@ -386,8 +457,6 @@ populate()
     echo ""
     echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
     read CONTINUE    
-
-    pwd_req "${BBDD} database user"
 
     echo ""  
     echo -e "${LCYAN}Setting up the ${CYAN}${FILE}${LCYAN} connection file:${NC}"    
@@ -519,8 +588,6 @@ metabase_service()
     echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} service:${NC}"    
     echo -e "   Creating the execution script for the current ${LCYAN}${USER}${NC} instance..."
     touch $FILE
-    
-    pwd_req "${BBDD} database user"
 
     echo "#!/bin/bash" >> ${FILE}
     echo "cd /opt/metabase" >> ${FILE}
@@ -577,11 +644,7 @@ metabase_master()
 
   echo ""  
   if ! [ -f "$MARK" ]; then      
-    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} database:${NC}"  
-   
-    host_req
-    pwd_req "${BBDD} database user"    
-    email_req "metabase" "admin user"
+    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} database:${NC}"     
 
     mkdir -p $FOLDER
     cp -f resources/metabase.sql $DUMP        
@@ -604,15 +667,9 @@ metabase_setup()
   FOLDER=/tmp/teaching-stats
   USER="metabase"
   
-
   echo ""  
   if ! [ -f "$MARK" ]; then      
-    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"  
-   
-    host_req
-    pwd_req "${BBDD} database user"    
-    email_req "metabase" "admin user"
-
+    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"         
     echo "   Preparing the reset token for the admin password, it can take a while..."
     sed -i "s/-jar metabase.jar/-jar metabase.jar reset-password ${EMAIL}/g" ${FILE}
     RESULT=$(bash ${FILE})
@@ -624,6 +681,7 @@ metabase_setup()
     sleep 10  #TODO: should wait till metabase is ready
 
     echo
+    echo -e "   The ${CYAN}metabase${NC} admin's password cannot be setup automatically, so even than any password can be provided, its recommended to use the same as provided before:"
     echo -e "    1. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000/auth/reset_password/${TOKEN}${NC}"
     echo -e "    2. Set your new ${CYAN}metabase admin password${NC}."    
     echo 
@@ -696,6 +754,9 @@ pip_req django-allauth 0.47.0
 pip_req psycopg2-binary 2.9.3
 pip_req pytz
 
+copy_files
+collect_data
+
 bbdd_create $BBDD
 bbdd_user
 
@@ -703,7 +764,6 @@ bbdd_schema public
 bbdd_schema master
 bbdd_schema reports
 
-copy_files
 setup_files
 setup_django
 setup_gauth
@@ -718,6 +778,8 @@ metabase_service
 metabase_master #TODO: metabase_master loads the master data but no data about answers.
 metabase_setup
 metabase_dashboards
+
+clean_data
 
 trap : 0
 echo ""
