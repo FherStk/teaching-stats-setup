@@ -142,7 +142,7 @@ bbdd_user()
   if [ $(runuser -l postgres -c "psql -c \"\\du ${BBDD}\" | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
   then          
     echo -e "${LCYAN}Creating the ${CYAN}${BBDD}${LCYAN} database user:${NC}"
-    echo -e "A PostgreSQL user named ${CYAN}${BBDD}${LCYAN} will be created into the ${CYAN}${BBDD}${LCYAN} database, which will be its owner with all granted permissions."
+    echo -e "A PostgreSQL user named ${CYAN}${BBDD}${NC} will be created into the ${CYAN}${BBDD}${NC} database, which will be its owner with all granted permissions."
     
     pwd_req "postgresql database user"
     
@@ -235,7 +235,7 @@ setup_django()
     
     echo ""    
     echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} Django superuser:${NC}"
-    echo -e "A Django superuser named ${CYAN}${BBDD}${LCYAN} will be created into the ${CYAN}${BBDD}${LCYAN} Django instance, use this user to login into Django as an administrator."
+    echo -e "A Django superuser named ${CYAN}${BBDD}${NC} will be created into the ${CYAN}${BBDD}${NC} Django instance, use this user to login into Django as an administrator."
     pwd_req "Django superuser"
     
     email_req ${BBDD} "Django superuser (just for notification purposes)"    
