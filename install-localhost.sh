@@ -150,10 +150,10 @@ collect_data()
   echo ""
   if ! [ -f "$MARK" ]; then    
     echo -e "${LCYAN}Collecting data for the ${CYAN}${BBDD}${LCYAN} ecosystem setup:${NC}"
-    echo "The ${LCYAN}${BBDD}${NC} setup relays on a bunch of applications that works together to provide a set of survey capabilities, in order to simplify the installation and configuration process, the same users, passwords and emails will be used along all the setup process."    
+    echo -e "The ${LCYAN}${BBDD}${NC} setup relays on a bunch of applications that works together to provide a set of survey capabilities, in order to simplify the installation and configuration process, the same users, passwords and emails will be used along all the setup process."    
 
     echo
-    echo "The ${LCYAN}${BBDD}${NC} username will be used for all the applications involded into the ${LCYAN}${BBDD}${NC} setup."
+    echo -e "The ${LCYAN}${BBDD}${NC} username will be used for all the applications involded into the ${LCYAN}${BBDD}${NC} setup."
     email_req
     pwd_req
 
