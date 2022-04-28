@@ -667,7 +667,6 @@ metabase_setup()
   FOLDER=/tmp/teaching-stats
   USER="metabase"
   
-
   echo ""  
   if ! [ -f "$MARK" ]; then      
     echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"     
