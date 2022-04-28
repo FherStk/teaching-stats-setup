@@ -669,7 +669,7 @@ metabase_setup()
   
   echo ""  
   if ! [ -f "$MARK" ]; then      
-    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"     
+    echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"         
     echo "   Preparing the reset token for the admin password, it can take a while..."
     sed -i "s/-jar metabase.jar/-jar metabase.jar reset-password ${EMAIL}/g" ${FILE}
     RESULT=$(bash ${FILE})
@@ -681,6 +681,7 @@ metabase_setup()
     sleep 10  #TODO: should wait till metabase is ready
 
     echo
+    echo "   The ${CYAN}metabase${NC} admin's password cannot be setup automatically, so even than any password can be provided, its recommended to use the same as provided before:"
     echo -e "    1. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000/auth/reset_password/${TOKEN}${NC}"
     echo -e "    2. Set your new ${CYAN}metabase admin password${NC}."    
     echo 
