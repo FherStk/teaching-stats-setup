@@ -355,36 +355,25 @@ setup_gauth()
     echo -e "        4.1. Press the ${CYAN}create credentials${NC} button."
     echo -e "        4.2. Select the ${CYAN}OAuth client ID${NC} option."
     echo -e "        4.3. Application type: ${CYAN}Web application${NC}"
-    echo -e "        4.4. Name: ${CYAN}${BBDD}${NC}"
-
-    if [ "$HOST"=="127.0.0.1" ]; then
-      echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${HOST}:8000${NC}"                    
-      echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${HOST}:8000/google/login/callback/${NC}" 
-    else
-      echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${BBDD}.com:8000${NC}"                   
-      echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${BBDD}.com:8000/google/login/callback/${NC}"        
-    fi
-
+    echo -e "        4.4. Name: ${CYAN}${BBDD}${NC}"    
+    echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${BBDD}.com:8000${NC}"                   
+    echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${BBDD}.com:8000/google/login/callback/${NC}"        
+    
     echo -e "        4.7. Press the ${CYAN}create${NC} button."
     echo -e "        4.8. Copy your ${CYAN}client id${NC} and ${CYAN}secret key${NC}, it will be required later."
-
-    if [ "$HOST"=="127.0.0.1" ]; then                 
-      echo
-      echo -e "    5. In order to login using your Google credentials, edit your local ${CYAN}/etc/hosts${NC} file, otherwise, your browser won't be able to login."
-      echo -e "        5.1 Edit your local hosts file with ${CYAN}sudo nano /etc/hosts${NC} or the text editor you wish."
-      echo -e "        5.2 Add the follogin entry at the begining: ${CYAN}${HOST} ${BBDD}.com${NC}."
-      echo -e "        5.3 Save the changes."          
-    fi
+    
+    echo
+    echo -e "    5. In order to login using your Google credentials, edit your local ${CYAN}/etc/hosts${NC} file, otherwise, your browser won't be able to login."
+    echo -e "        5.1 Edit your local hosts file with ${CYAN}sudo nano /etc/hosts${NC} or the text editor you wish."
+    echo -e "        5.2 Add the follogin entry at the begining: ${CYAN}${HOST} ${BBDD}.com${NC}."
+    echo -e "        5.3 Save the changes."              
     
     echo ""
     echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
     read 
-
-    if [ "$HOST"=="127.0.0.1" ]; then                 
-      #service network-manager restart 
-      systemctl restart systemd-hostnamed
-    fi
-
+    
+    systemctl restart systemd-hostnamed
+    
     echo ""
     echo -e "${LCYAN}Setting up Django's social account:${NC}"
     CURRENT=${PWD}
