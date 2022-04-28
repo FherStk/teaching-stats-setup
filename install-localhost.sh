@@ -357,7 +357,7 @@ setup_gauth()
     echo -e "        4.3. Application type: ${CYAN}Web application${NC}"
     echo -e "        4.4. Name: ${CYAN}${BBDD}${NC}"
 
-    if [ "$HOST"="127.0.0.1" ]; then
+    if [ "$HOST"=="127.0.0.1" ]; then
       echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${HOST}:8000${NC}"                    
       echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${HOST}:8000/google/login/callback/${NC}" 
     else
@@ -368,7 +368,7 @@ setup_gauth()
     echo -e "        4.7. Press the ${CYAN}create${NC} button."
     echo -e "        4.8. Copy your ${CYAN}client id${NC} and ${CYAN}secret key${NC}, it will be required later."
 
-    if [ "$HOST"="127.0.0.1" ]; then                 
+    if [ "$HOST"=="127.0.0.1" ]; then                 
       echo
       echo -e "    5. In order to login using your Google credentials, edit your local ${CYAN}/etc/hosts${NC} file, otherwise, your browser won't be able to login."
       echo -e "        5.1 Edit your local hosts file with ${CYAN}sudo nano /etc/hosts${NC} or the text editor you wish."
@@ -380,7 +380,7 @@ setup_gauth()
     echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
     read 
 
-    if [ "$HOST"="127.0.0.1" ]; then                 
+    if [ "$HOST"=="127.0.0.1" ]; then                 
       #service network-manager restart 
       systemctl restart systemd-hostnamed
     fi
