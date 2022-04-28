@@ -681,7 +681,7 @@ metabase_setup()
     sleep 10  #TODO: should wait till metabase is ready
 
     echo
-    echo "   The ${CYAN}metabase${NC} admin's password cannot be setup automatically, so even than any password can be provided, its recommended to use the same as provided before:"
+    echo -e "   The ${CYAN}metabase${NC} admin's password cannot be setup automatically, so even than any password can be provided, its recommended to use the same as provided before:"
     echo -e "    1. Visit the current instance of Metabase at ${CYAN}http://${HOST}:3000/auth/reset_password/${TOKEN}${NC}"
     echo -e "    2. Set your new ${CYAN}metabase admin password${NC}."    
     echo 
