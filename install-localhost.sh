@@ -83,20 +83,29 @@ lxd_req()
 
 pwd_req()
 {  
-  if [ -z "$PASS" ]; then    
-    while true; do        
-      echo
-      echo -e "${ORANGE}Please, provide the password for the ${CYAN}${BBDD}${ORANGE} ${1}:${NC}"
-      read -s PASS
+  if [ -z "$PASS" ]; then
+    FILE="$DIR/setup-files.pwd"
 
-      echo -e "${ORANGE}Set the password (again):${NC}"
-      read -s PASS2
-      echo ""
+    if ! [ -f "$FILE" ]; then    
+      while true; do        
+        echo
+        echo -e "${ORANGE}Please, provide the password for all the applications involded into the ${CYAN}${BBDD}${ORANGE} setup:${NC}"
+        read -s PASS
 
-      [ "$PASS" = "$PASS2" ] && break
-      echo -e "${RED}Password missmatch, please try again.${NC}"
-      echo ""
-    done  
+        echo -e "${ORANGE}Set the password (again):${NC}"
+        read -s PASS2
+        echo ""
+
+        [ "$PASS" = "$PASS2" ] && break
+        echo -e "${RED}Password missmatch, please try again.${NC}"
+        echo ""
+      done  
+
+      touch $FILE
+      echo $PASS > $FILE
+    else
+      PASS=$(cat ${FILE})
+    fi    
   fi
 }
 
@@ -118,9 +127,39 @@ host_req()
 email_req()
 {
   if [ -z "$EMAIL" ]; then    
+    FILE="$DIR/setup-files.mail"
+
+    if ! [ -f "$FILE" ]; then    
+      echo
+      echo -e "${ORANGE}Please, provide the email for all the applications involded into the ${CYAN}${BBDD}${ORANGE} setup:${NC}"
+      echo -e "${RED}Warning! This email will be attached to the Django superuser and won't be able to join (or review the results of) any survey.${NC}"
+      read EMAIL  
+      
+      touch $FILE
+      echo $EMAIL > $FILE
+    else
+      EMAIL=$(cat ${FILE})
+    fi  
+  fi 
+}
+
+collect_data()
+{  
+  MARK="$DIR/collect-data.done"
+
+  echo ""
+  if ! [ -f "$MARK" ]; then    
+    echo -e "${LCYAN}Collecting data for the ${CYAN}${BBDD}${LCYAN} ecosystem setup:${NC}"
+    echo "The ${LCYAN}${BBDD}${NC} setup relays on a bunch of applications that works together to provide a set of survey capabilities, in order to simplify the installation and configuration process, the same users, passwords and emails will be used along all the setup process."    
+
     echo
-    echo -e "${ORANGE}Please, provide the email for the ${CYAN}$1${ORANGE} $2:${NC}"
-    read EMAIL  
+    echo "The ${LCYAN}${BBDD}${NC} username will be used for all the applications involded into the ${LCYAN}${BBDD}${NC} setup."
+    email_req
+    pwd_req
+
+    touch $MARK
+  else
+    echo -e "${CYAN}Setup ${LCYAN}${BBDD}${CYAN} data already collected, skipping...${NC}"
   fi
 }
 
@@ -144,7 +183,7 @@ bbdd_user()
     echo -e "${LCYAN}Creating the ${CYAN}${BBDD}${LCYAN} database user:${NC}"
     echo -e "A PostgreSQL user named ${CYAN}${BBDD}${NC} will be created into the ${CYAN}${BBDD}${NC} database, which will be its owner with all granted permissions."
     
-    pwd_req "postgresql database user"
+    pwd_req
     
     runuser -l postgres -c "psql -e -c 'CREATE USER \"${BBDD}\" WITH PASSWORD '\'${PASS}\'';'"
     runuser -l postgres -c "psql -e -c 'ALTER DATABASE \"${BBDD}\" OWNER TO \"${BBDD}\";'"
@@ -194,7 +233,7 @@ setup_files()
     echo "Setting up database user..."
     sed -i "s/'YOUR-USER'/'${BBDD}'/g" ${FILE}
 
-    pwd_req "postgresql database user"              
+    pwd_req
 
     echo "Setting up database host..."
     sed -i "s/'YOUR-HOST'/'localhost'/g" ${FILE}
@@ -236,9 +275,9 @@ setup_django()
     echo ""    
     echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} Django superuser:${NC}"
     echo -e "A Django superuser named ${CYAN}${BBDD}${NC} will be created into the ${CYAN}${BBDD}${NC} Django instance, use this user to login into Django as an administrator."
-    pwd_req "Django superuser"
+    pwd_req
     
-    email_req ${BBDD} "Django superuser (just for notification purposes)"    
+    email_req
     echo ""
 
     DJANGO_SUPERUSER_PASSWORD=${PASS} \
@@ -263,7 +302,7 @@ setup_gauth()
     host_req
     echo ""
 
-    email_req "Google" "user account"    
+    email_req
 
     echo -e "    1. Visit the Google Developers Console at ${CYAN}https://console.developers.google.com/projectcreate${NC} and log in with your Google account."
     echo -e "        1.1. Project name: ${CYAN}${BBDD}${NC}"
@@ -390,7 +429,7 @@ populate()
     echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
     read CONTINUE    
 
-    pwd_req "${BBDD} database user"
+    pwd_req
 
     echo ""  
     echo -e "${LCYAN}Setting up the ${CYAN}${FILE}${LCYAN} connection file:${NC}"    
@@ -523,7 +562,7 @@ metabase_service()
     echo -e "   Creating the execution script for the current ${LCYAN}${USER}${NC} instance..."
     touch $FILE
     
-    pwd_req "${BBDD} database user"
+    pwd_req
 
     echo "#!/bin/bash" >> ${FILE}
     echo "cd /opt/metabase" >> ${FILE}
@@ -583,8 +622,8 @@ metabase_master()
     echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} database:${NC}"  
    
     host_req
-    pwd_req "${BBDD} database user"    
-    email_req "metabase" "admin user"
+    pwd_req
+    email_req
 
     mkdir -p $FOLDER
     cp -f resources/metabase.sql $DUMP        
@@ -613,8 +652,8 @@ metabase_setup()
     echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"  
    
     host_req
-    pwd_req "${BBDD} database user"    
-    email_req "metabase" "admin user"
+    pwd_req
+    email_req
 
     echo "   Preparing the reset token for the admin password, it can take a while..."
     sed -i "s/-jar metabase.jar/-jar metabase.jar reset-password ${EMAIL}/g" ${FILE}
@@ -699,6 +738,7 @@ pip_req django-allauth 0.47.0
 pip_req psycopg2-binary 2.9.3
 pip_req pytz
 
+collect_data
 bbdd_create $BBDD
 bbdd_user
 
