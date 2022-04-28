@@ -115,7 +115,6 @@ host_req()
     FILE="$DIR/setup-files.host"
 
     if ! [ -f "$FILE" ]; then   
-      echo
       lxd_req    
 
       IPv4=$(hostname -I | cut -d' ' -f1)
@@ -163,19 +162,19 @@ collect_data()
     echo -e "The ${LCYAN}${BBDD}${NC} setup relays on a bunch of applications that works together to provide a set of survey capabilities, in order to simplify the installation and configuration process, the same users, passwords and emails will be used along all the setup process."    
 
     echo
-    echo -e "The ${LCYAN}${BBDD}${NC} username will be used for all the applications involded into the ${LCYAN}${BBDD}${NC} setup."
-    host_req
+    echo -e "The ${LCYAN}${BBDD}${NC} username will be used for all the applications involded into the ${LCYAN}${BBDD}${NC} setup."    
     email_req
     pwd_req    
+    host_req
 
     touch $MARK
   else
     echo -e "${CYAN}Setup ${LCYAN}${BBDD}${CYAN} data already collected, skipping...${NC}"
     
-    #data will be loaded from the existing files, no promt nor output required
-    host_req
+    #data will be loaded from the existing files, no promt nor output required    
     email_req
     pwd_req    
+    host_req
   fi
 }
 
