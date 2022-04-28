@@ -21,7 +21,6 @@ BBDD='teaching-stats'
 DIR="/var/www/${BBDD}"
 LOCALHOST="127.0.0.1" #Used for local connections like Django -> postgres
 PSQL_PORT="5432"
-VERSION="0.0.5"
 PASS=''
 EMAIL=''
 HOST='' #used to allow remote to local connections, useful when running within containers
@@ -358,7 +357,7 @@ setup_gauth()
     echo -e "        4.3. Application type: ${CYAN}Web application${NC}"
     echo -e "        4.4. Name: ${CYAN}${BBDD}${NC}"
 
-    if [ "$HOST"="127.0.0.1" ]; then                 
+    if [ "$HOST"="127.0.0.1" ]; then
       echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${HOST}:8000${NC}"                    
       echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${HOST}:8000/google/login/callback/${NC}" 
     else
