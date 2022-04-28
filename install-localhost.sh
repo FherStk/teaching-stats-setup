@@ -738,7 +738,9 @@ pip_req django-allauth 0.47.0
 pip_req psycopg2-binary 2.9.3
 pip_req pytz
 
+copy_files
 collect_data
+
 bbdd_create $BBDD
 bbdd_user
 
@@ -746,7 +748,6 @@ bbdd_schema public
 bbdd_schema master
 bbdd_schema reports
 
-copy_files
 setup_files
 setup_django
 setup_gauth
