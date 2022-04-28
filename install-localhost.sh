@@ -84,7 +84,7 @@ lxd_req()
 pwd_req()
 {  
   if [ -z "$PASS" ]; then
-    FILE="$DIR/setup-files.pwd"
+    FILE="$DIR/setup-files.pass"
 
     if ! [ -f "$FILE" ]; then    
       while true; do        
@@ -112,15 +112,25 @@ pwd_req()
 host_req()
 {
   if [ -z "$HOST" ]; then    
-    echo
-    lxd_req    
+    FILE="$DIR/setup-files.host"
 
-    IPv4=$(hostname -I | cut -d' ' -f1)
-    if [ "$LXD"="TRUE" ]; then    
-      HOST=${IPv4}
+    if ! [ -f "$FILE" ]; then   
+      echo
+      lxd_req    
+
+      IPv4=$(hostname -I | cut -d' ' -f1)
+      if [ "$LXD"="TRUE" ]; then    
+        HOST=${IPv4}
+      else
+        HOST=${LOCALHOST}
+      fi
+
+      touch $FILE
+      echo $HOST > $FILE
+
     else
-      HOST=${LOCALHOST}
-    fi
+      HOST=$(cat ${FILE})
+    fi   
   fi
 }
 
@@ -154,14 +164,16 @@ collect_data()
 
     echo
     echo -e "The ${LCYAN}${BBDD}${NC} username will be used for all the applications involded into the ${LCYAN}${BBDD}${NC} setup."
+    host_req
     email_req
-    pwd_req
+    pwd_req    
 
     touch $MARK
   else
     echo -e "${CYAN}Setup ${LCYAN}${BBDD}${CYAN} data already collected, skipping...${NC}"
     
-    #email and password will be loaded from the existing files, no promt nor output required
+    #data will be loaded from the existing files, no promt nor output required
+    host_req
     email_req
     pwd_req    
   fi
@@ -170,8 +182,9 @@ collect_data()
 clean_data()
 {  
   MARK="$DIR/collect-data.done"
+  HOSTFILE="$DIR/setup-files.host"
   MAILFILE="$DIR/setup-files.mail"
-  PWDFILE="$DIR/setup-files.pwd"
+  PWDFILE="$DIR/setup-files.pass"
 
   echo ""
   if ! [ -f "$MARK" ]; then    
@@ -179,6 +192,9 @@ clean_data()
   else    
     echo -e "${LCYAN}Cleaning collected data for the ${CYAN}${BBDD}${LCYAN} ecosystem setup:${NC}"
     
+    echo -e "Cleaning host..."
+    rm ${HOSTFILE}
+
     echo -e "Cleaning email..."
     rm ${MAILFILE}
 
@@ -266,7 +282,6 @@ setup_files()
     sed -i "s/'YOUR-PASSWORD'/'${PASS}'/g" ${FILE}
         
     echo "Setting up the allowed hosts..."     
-    host_req
     sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}','${BBDD}.com'\]/g" /var/www/teaching-stats/home/settings.py      
 
     touch $MARK
@@ -317,7 +332,6 @@ setup_gauth()
     URL="http://${HOST}:8000"
 
     echo -e "${LCYAN}Setting up Google Authentication:${NC}"
-    host_req
     echo ""
 
     echo -e "    1. Visit the Google Developers Console at ${CYAN}https://console.developers.google.com/projectcreate${NC} and log in with your Google account."
@@ -632,7 +646,6 @@ metabase_master()
   echo ""  
   if ! [ -f "$MARK" ]; then      
     echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} database:${NC}"     
-    host_req    
 
     mkdir -p $FOLDER
     cp -f resources/metabase.sql $DUMP        
@@ -659,8 +672,6 @@ metabase_setup()
   echo ""  
   if ! [ -f "$MARK" ]; then      
     echo -e "${CYAN}Setting up the ${LCYAN}${USER}${CYAN} instance:${NC}"     
-    host_req    
-
     echo "   Preparing the reset token for the admin password, it can take a while..."
     sed -i "s/-jar metabase.jar/-jar metabase.jar reset-password ${EMAIL}/g" ${FILE}
     RESULT=$(bash ${FILE})
