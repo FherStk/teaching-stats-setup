@@ -19,7 +19,7 @@ LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
 BBDD='teaching-stats'
 DIR="/var/www/${BBDD}"
-LOCALHOST="127.0.0.1" #Used for local connections like django -> postgres
+LOCALHOST="127.0.0.1" #Used for local connections like Django -> postgres
 PSQL_PORT="5432"
 VERSION="0.0.5"
 PASS=''
@@ -140,8 +140,10 @@ bbdd_user()
 {
   echo ""
   if [ $(runuser -l postgres -c "psql -c \"\\du ${BBDD}\" | cut -d \| -f 1 | grep -c ${BBDD}") -eq 0 ];
-  then    
+  then          
     echo -e "${LCYAN}Creating the ${CYAN}${BBDD}${LCYAN} database user:${NC}"
+    echo -e "A PostgreSQL user named ${CYAN}${BBDD}${LCYAN} will be created into the ${CYAN}${BBDD}${LCYAN} database, which will be its owner with all granted permissions."
+    
     pwd_req "postgresql database user"
     
     runuser -l postgres -c "psql -e -c 'CREATE USER \"${BBDD}\" WITH PASSWORD '\'${PASS}\'';'"
@@ -185,7 +187,7 @@ setup_files()
 
   echo ""
   if ! [ -f "$MARK" ]; then    
-    echo -e "${LCYAN}Setting up the initial django data within ${CYAN}${FILE}${LCYAN}:${NC}"
+    echo -e "${LCYAN}Setting up the initial Django data within ${CYAN}${FILE}${LCYAN}:${NC}"
     echo "Setting up database name..."
     sed -i "s/'YOUR-DATABASE'/'${BBDD}'/g" ${FILE}
 
@@ -219,7 +221,7 @@ setup_django()
 
   echo ""  
   if ! [ -f "$MARK" ]; then    
-    echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django instance:${NC}"
+    echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} Django instance:${NC}"
     
     CURRENT=${PWD}
     
@@ -232,10 +234,11 @@ setup_django()
     python3 manage.py collectstatic --noinput
     
     echo ""    
-    echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} django superuser:${NC}"
-    pwd_req "django superuser"
+    echo -e "${LCYAN}Setting up the ${CYAN}${BBDD}${LCYAN} Django superuser:${NC}"
+    echo -e "A Django superuser named ${CYAN}${BBDD}${LCYAN} will be created into the ${CYAN}${BBDD}${LCYAN} Django instance, use this user to login into Django as an administrator."
+    pwd_req "Django superuser"
     
-    email_req ${BBDD} "django superuser"    
+    email_req ${BBDD} "Django superuser (just for notification purposes)"    
     echo ""
 
     DJANGO_SUPERUSER_PASSWORD=${PASS} \
@@ -316,14 +319,14 @@ setup_gauth()
     fi
 
     echo ""
-    echo -e "${LCYAN}Setting up django's social account:${NC}"
+    echo -e "${LCYAN}Setting up Django's social account:${NC}"
     CURRENT=${PWD}
         
     cd ${DIR}
     python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use '0.0.0.0:8000' when running within a container, in order to allow remote connections
     PID=$!  
 
-    echo -e "    1. Visit the django's admin site ${CYAN}${URL}/admin${NC} and log in as ${CYAN}${BBDD}${NC} superuser."
+    echo -e "    1. Visit the Django's admin site ${CYAN}${URL}/admin${NC} and log in as ${CYAN}${BBDD}${NC} superuser."
     echo -e "    2. Go to Sites → Site → Add site. Set it up:"
     echo -e "        Domain name: ${CYAN}${BBDD}.com:8000${NC}"
     echo -e "        Display name: ${CYAN}${BBDD}${NC}"
@@ -354,9 +357,9 @@ setup_site()
 
   echo ""  
   if ! [ -f "$MARK" ]; then    
-    echo -e "${LCYAN}Setting up the site django data within ${CYAN}${FILE}${LCYAN}:${NC}"
+    echo -e "${LCYAN}Setting up the site Django data within ${CYAN}${FILE}${LCYAN}:${NC}"
     echo "Setting up the site secret key..." 
-    SECRET=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
+    SECRET=$(python -c 'from Django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
     sed -i "s/'YOUR-SECRET-KEY'/'${SECRET}'/g" ${FILE}          
 
     ID=$(runuser -l postgres -c "psql -d \"${BBDD}\" -qtAX -c 'SELECT * FROM django_site WHERE name='\'${HOST}:8000\'';'")    
