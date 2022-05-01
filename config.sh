@@ -52,11 +52,12 @@ if [ "$MODE" == "survey" ]; then
         echo -e "${RED}Survey seasson is currently closed.${NC}"
 
     elif [ "$OPTION" == "restart" ]; then    
+        echo
         echo -e "${RED}Warning! Cleaning the participation allows the participants to answer again to the current survey, incurring into possible duplications.${NC}"
-        echo -e "Do you want to proceed? [n/Y]"
+        echo -e "Do you want to proceed? [y/N]"
 
         read CONFIRM
-        if [ "$CONFIRM" == "Y" ]; then
+        if [ "$CONFIRM" == "y" ]; then
             restart
             echo   
             echo -e "${GREEN}Participation data has been erased.${NC}"
@@ -64,20 +65,21 @@ if [ "$MODE" == "survey" ]; then
             echo -e "Skipping..."
         fi   
 
-    elif [ "$OPTION" == "reset" ]; then    
+    elif [ "$OPTION" == "reset" ]; then   
+        echo 
         echo -e "${RED}Warning! The list of trainers, students and the subjects assigned to each of them will be erased, including the participation data. No participant will be able to joint the survey till this data became reintroduced into the system.${NC}"
-        echo -e "Do you want to proceed? [n/Y]"
+        echo -e "Do you want to proceed? [y/N]"
 
         read CONFIRM
-        if [ "$CONFIRM" == "Y" ]; then
+        if [ "$CONFIRM" == "y" ]; then
             restart
             
-            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE public.subject_student;'"
-            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE public.student;'"
-            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE public.subject_trainer_group;'"
+            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE master.subject_student;'"
+            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE master.student;'"
+            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE master.subject_trainer_group;'"
             
-            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'SELECT pg_catalog.setval('\'public.student_id_seq\'', 1, true);'" 
-            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'SELECT pg_catalog.setval('\'public.subject_trainer_group_id_seq\'', 1, true);'"                                    
+            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'SELECT pg_catalog.setval('\'master.student_id_seq\'', 1, true);'" 
+            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'SELECT pg_catalog.setval('\'master.subject_trainer_group_id_seq\'', 1, true);'"                                    
 
             echo   
             echo -e "${GREEN}The list of trainers and students has been erased.${NC}"
