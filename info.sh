@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION="0.0.8"
+VERSION="0.0.9"
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
