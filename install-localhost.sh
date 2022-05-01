@@ -394,7 +394,7 @@ setup_gauth()
     read SECRET
 
     echo
-    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'INSERT INTO public.socialaccount_socialapp (id, provider, name, client_id, secret) VALUES (1, '\'google\'', '\'google-api\'', '\'${CLIENT}\'', '\'${SECRET}\'');'"
+    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'INSERT INTO public.socialaccount_socialapp (id, provider, name, client_id, secret, key) VALUES (1, '\'google\'', '\'google-api\'', '\'${CLIENT}\'', '\'${SECRET}\'', '\'\'');'"
     runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'INSERT INTO public.django_site(d, domain, name) VALUES (2, '\'${CLIENT}.com\'', '\'${CLIENT}.com\'');'"
     runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'INSERT INTO public.socialaccount_socialapp_sites(id, socialapp_id, site_id) VALUES (2, 1, 2);'"    
     
