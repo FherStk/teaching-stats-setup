@@ -149,7 +149,7 @@ collect_data()
     echo -e "The ${LCYAN}${BBDD}${NC} username will be used for all the applications involded into the ${LCYAN}${BBDD}${NC} setup."    
     email_req
     pwd_req    
-    host_req
+    lxd_req
 
     touch $MARK
   else
@@ -158,7 +158,7 @@ collect_data()
     #data will be loaded from the existing files, no promt nor output required    
     email_req
     pwd_req    
-    host_req
+    lxd_req
   fi
 }
 
