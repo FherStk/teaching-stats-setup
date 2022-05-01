@@ -254,6 +254,7 @@ setup_host()
     fi
 
     echo
+    echo -e "${LCYAN}Setting up the hostname:${NC}"
     echo -e "Setting up a hostname for the current local instance will simplify the setup process and also allow some third party components to work properly (like the ability to login using your Google credentials)."    
     echo -e "    1. For GNU/Linux and macOS hosts:"
     echo -e "        1.1. Run the following command in your host computer: ${CYAN}sudo echo ${IPv4}\t${HOST} >> /etc/hosts${NC}"
