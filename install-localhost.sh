@@ -396,6 +396,7 @@ setup_gauth()
     echo
     runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'INSERT INTO public.socialaccount_socialapp (id, provider, name, client_id, secret, key) VALUES (1, '\'google\'', '\'google-api\'', '\'${CLIENT}\'', '\'${SECRET}\'', '\'\'');'"
     runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'INSERT INTO public.django_site(id, domain, name) VALUES (2, '\'${HOST}\'', '\'${HOST}\'');'"
+    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'INSERT INTO public.socialaccount_socialapp_sites(id, socialapp_id, site_id) VALUES (1, 1, 1);'"    
     runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'INSERT INTO public.socialaccount_socialapp_sites(id, socialapp_id, site_id) VALUES (2, 1, 2);'"    
     
     touch $MARK
