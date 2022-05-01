@@ -75,7 +75,7 @@ if [ "$MODE" == "survey" ]; then
             restart
             
             runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE master.subject_student;'"
-            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE master.student;'"
+            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE master.student CASCADE;'"
             runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE master.subject_trainer_group;'"
             
             runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'SELECT pg_catalog.setval('\'master.student_id_seq\'', 1, true);'" 
