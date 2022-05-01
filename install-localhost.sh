@@ -19,13 +19,12 @@ LCYAN='\033[1;36m'
 NC='\033[0m' # No Color
 BBDD='teaching-stats'
 DIR="/var/www/${BBDD}"
+HOST="${BBDD}.com"
 LOCALHOST="127.0.0.1" #Used for local connections like Django -> postgres
 PSQL_PORT="5432"
 PASS=''
 EMAIL=''
-HOST='' #used to allow remote to local connections, useful when running within containers
 LXD=''
-
 
 abort()
 {
@@ -67,16 +66,26 @@ pip_req()
 
 lxd_req()
 {
-  if [ -z "$LXD" ]; then   
-    echo 
-    echo -e "${ORANGE}Is this instance running within an ${CYAN}LXD${ORANGE} container or similar?${NC} [y/N]"
-    read LXD
+  if [ -z "$LXD" ]; then    
+    FILE="$DIR/setup-files.lxd"
 
-    if [ "$LXD"="y" ]; then    
-      LXD="TRUE"
+    if ! [ -f "$FILE" ]; then   
+      echo 
+      echo -e "${ORANGE}Is this instance running within an ${CYAN}LXD${ORANGE} container or similar?${NC} [y/N]"
+      read LXD
+
+      if [ "$LXD"="y" ]; then    
+        LXD="TRUE"
+      else
+        LXD="FALSE"
+      fi
+
+      touch $FILE
+      echo $LXD > $FILE
+
     else
-      LXD="FALSE"
-    fi
+      LXD=$(cat ${FILE})
+    fi   
   fi
 }
 
@@ -105,30 +114,6 @@ pwd_req()
     else
       PASS=$(cat ${FILE})
     fi    
-  fi
-}
-
-host_req()
-{
-  if [ -z "$HOST" ]; then    
-    FILE="$DIR/setup-files.host"
-
-    if ! [ -f "$FILE" ]; then   
-      lxd_req    
-
-      IPv4=$(hostname -I | cut -d' ' -f1)
-      if [ "$LXD"="TRUE" ]; then    
-        HOST=${IPv4}
-      else
-        HOST=${LOCALHOST}
-      fi
-
-      touch $FILE
-      echo $HOST > $FILE
-
-    else
-      HOST=$(cat ${FILE})
-    fi   
   fi
 }
 
@@ -164,7 +149,7 @@ collect_data()
     echo -e "The ${LCYAN}${BBDD}${NC} username will be used for all the applications involded into the ${LCYAN}${BBDD}${NC} setup."    
     email_req
     pwd_req    
-    host_req
+    lxd_req
 
     touch $MARK
   else
@@ -173,14 +158,14 @@ collect_data()
     #data will be loaded from the existing files, no promt nor output required    
     email_req
     pwd_req    
-    host_req
+    lxd_req
   fi
 }
 
 clean_data()
 {  
   MARK="$DIR/collect-data.done"
-  HOSTFILE="$DIR/setup-files.host"
+  HOSTFILE="$DIR/setup-files.lxd"
   MAILFILE="$DIR/setup-files.mail"
   PWDFILE="$DIR/setup-files.pass"
 
@@ -256,6 +241,37 @@ copy_files()
   fi
 }
 
+setup_host()
+{
+  FILE="$DIR/setup-host.done"
+
+  if ! [ -f "$FILE" ]; then   
+    lxd_req    
+
+    IPv4=$(hostname -I | cut -d' ' -f1)
+    if [ "$LXD" == "FALSE" ]; then    
+      IPv4=${LOCALHOST}  
+    fi
+
+    echo
+    echo -e "${LCYAN}Setting up the ${CYAN}hostname${LCYAN}:${NC}"
+    echo -e "Setting up a hostname for the current local instance will simplify the setup process and also allow some third party components to work properly (like the ability to login using your Google credentials)."    
+    echo -e "    1. For GNU/Linux and macOS hosts:"
+    echo -e "        1.1. Run the following command in your host computer: ${CYAN}sudo echo -e \"${IPv4}\\\t${HOST}\" >> /etc/hosts${NC}"
+    echo
+    echo -e "    2. For Windows hosts:"
+    echo -e "        2.1. Press ${CYAN}CTRL + R${NC} keys"
+    echo -e "        2.2. Write ${CYAN}Notepad \"c:\Windows\System32\Drivers\etc\hosts\"${NC} in the dialog and press ${CYAN}ENTER${NC}."
+    echo -e "        2.3 Add the following entry at the end: ${CYAN}${IPv4}\t${HOST}${NC}."    
+    echo ""
+    echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
+    read 
+
+    touch $FILE    
+  fi   
+}
+
+
 setup_files()
 {
   MARK="$DIR/setup-files.done"
@@ -280,7 +296,7 @@ setup_files()
     sed -i "s/'YOUR-PASSWORD'/'${PASS}'/g" ${FILE}
         
     echo "Setting up the allowed hosts..."     
-    sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}','${BBDD}.com'\]/g" /var/www/teaching-stats/home/settings.py      
+    sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}'\]/g" /var/www/teaching-stats/home/settings.py      
 
     touch $MARK
   else
@@ -356,17 +372,11 @@ setup_gauth()
     echo -e "        4.2. Select the ${CYAN}OAuth client ID${NC} option."
     echo -e "        4.3. Application type: ${CYAN}Web application${NC}"
     echo -e "        4.4. Name: ${CYAN}${BBDD}${NC}"    
-    echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${BBDD}.com:8000${NC}"                   
-    echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${BBDD}.com:8000/google/login/callback/${NC}"        
+    echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${HOST}:8000${NC}"                   
+    echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${HOST}:8000/google/login/callback/${NC}"        
     
     echo -e "        4.7. Press the ${CYAN}create${NC} button."
-    echo -e "        4.8. Copy your ${CYAN}client id${NC} and ${CYAN}secret key${NC}, it will be required later."
-    
-    echo
-    echo -e "    5. In order to login using your Google credentials, edit your local ${CYAN}/etc/hosts${NC} file, otherwise, your browser won't be able to login."
-    echo -e "        5.1 Edit your local hosts file with ${CYAN}sudo nano /etc/hosts${NC} or the text editor you wish."
-    echo -e "        5.2 Add the follogin entry at the begining: ${CYAN}${HOST} ${BBDD}.com${NC}."
-    echo -e "        5.3 Save the changes."              
+    echo -e "        4.8. Copy your ${CYAN}client id${NC} and ${CYAN}secret key${NC}, it will be required later."             
     
     echo ""
     echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
@@ -376,31 +386,20 @@ setup_gauth()
     
     echo ""
     echo -e "${LCYAN}Setting up Django's social account:${NC}"
-    CURRENT=${PWD}
-        
-    cd ${DIR}
-    python3 manage.py runserver 0.0.0.0:8000  > /dev/null 2>&1 &  #use '0.0.0.0:8000' when running within a container, in order to allow remote connections
-    PID=$!  
+    echo -e "${ORANGE}Please, write the ${CYAN}client id${NC}:"
+    read CLIENT
 
-    echo -e "    1. Visit the Django's admin site ${CYAN}${URL}/admin${NC} and log in as ${CYAN}${BBDD}${NC} superuser."
-    echo -e "    2. Go to Sites → Site → Add site. Set it up:"
-    echo -e "        Domain name: ${CYAN}${BBDD}.com:8000${NC}"
-    echo -e "        Display name: ${CYAN}${BBDD}${NC}"
-    echo -e "    3. Go to Social accounts → Social applications → Add social application. Set it up:"
-    echo -e "        Provider: ${CYAN}Google${NC}"
-    echo -e "        Name: ${CYAN}google-api${NC}"
-    echo -e "        Client id: ${CYAN}<your client id>${NC}"
-    echo -e "        Secret key: ${CYAN}<your secret key>${NC}"
-    echo -e "        You can leave the ${CYAN}key${NC} field empty."
-    echo -e "    4. Add ${CYAN}${BBDD}.com:8000${NC} and ${CYAN}example.com${NC} to Chosen sites and save the new settings."
-    echo ""
-    echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
-    read 
+    echo
+    echo -e "${ORANGE}Please, write the ${CYAN}secret key${NC}:"
+    read SECRET
 
-    kill $PID
-    cd ${CURRENT}
+    echo
+    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'INSERT INTO public.socialaccount_socialapp (id, provider, name, client_id, secret, key) VALUES (1, '\'google\'', '\'google-api\'', '\'${CLIENT}\'', '\'${SECRET}\'', '\'\'');'"
+    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'INSERT INTO public.django_site(id, domain, name) VALUES (2, '\'${HOST}\'', '\'${HOST}\'');'"
+    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'INSERT INTO public.socialaccount_socialapp_sites(id, socialapp_id, site_id) VALUES (1, 1, 1);'"    
+    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'INSERT INTO public.socialaccount_socialapp_sites(id, socialapp_id, site_id) VALUES (2, 1, 2);'"    
+    
     touch $MARK
-
   else
     echo -e "${CYAN}Google Authentication setup already done, skipping...${NC}"
   fi
@@ -752,6 +751,7 @@ bbdd_schema public
 bbdd_schema master
 bbdd_schema reports
 
+setup_host
 setup_files
 setup_django
 setup_gauth
