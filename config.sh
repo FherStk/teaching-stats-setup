@@ -25,12 +25,6 @@ options()
     echo
 }
 
-restart()
-{
-    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE public.forms_participation;'"
-    runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'SELECT pg_catalog.setval('\'public.forms_participation_id_seq\'', 1, true);'"                                    
-}
-
 trap 'abort' 0
 set -e
 
@@ -58,7 +52,9 @@ if [ "$MODE" == "survey" ]; then
 
         read CONFIRM
         if [ "$CONFIRM" == "y" ]; then
-            restart
+            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE public.forms_participation;'"
+            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'SELECT pg_catalog.setval('\'public.forms_participation_id_seq\'', 1, true);'" 
+
             echo   
             echo -e "${GREEN}Participation data has been erased.${NC}"
         else
@@ -72,13 +68,11 @@ if [ "$MODE" == "survey" ]; then
 
         read CONFIRM
         if [ "$CONFIRM" == "y" ]; then
-            restart
-            
-            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE master.subject_student;'"
             runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE master.student CASCADE;'"
             runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'TRUNCATE TABLE master.subject_trainer_group;'"
-            
+                        
             runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'SELECT pg_catalog.setval('\'master.student_id_seq\'', 1, true);'" 
+            runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'SELECT pg_catalog.setval('\'public.forms_participation_id_seq\'', 1, true);'" 
             runuser -l postgres -c "psql -d \"${BBDD}\" -e -c 'SELECT pg_catalog.setval('\'master.subject_trainer_group_id_seq\'', 1, true);'"                                    
 
             echo   
