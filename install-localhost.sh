@@ -296,7 +296,16 @@ setup_files()
     sed -i "s/'YOUR-PASSWORD'/'${PASS}'/g" ${FILE}
         
     echo "Setting up the allowed hosts..."     
-    sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}'\]/g" /var/www/teaching-stats/home/settings.py      
+    sed -i "s/ALLOWED_HOSTS = \['localhost'\]/ALLOWED_HOSTS = \['${HOST}'\]/g" ${FILE}
+
+    FILE="$DIR/forms/views.py"    
+    echo ""
+    echo -e "Only the users logged with an email from your domain will be able to join the survey."
+    echo -e "${ORANGE}Please, write your email domain: [elpuig.xeill.net]${NC}"
+    read DOMAIN
+    echo
+    echo "Setting up the email domain..."     
+    sed -i "s/if '@elpuig.xeill.net' not in user_email :/if '@${DOMAIN}' not in user_email :/g" ${FILE}
 
     touch $MARK
   else
