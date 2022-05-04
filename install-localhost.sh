@@ -348,46 +348,49 @@ setup_django()
 
 setup_gauth()
 {
-  MARK="$DIR/setup-gauth.done"
+  MARK="$DIR/setup-gauth.done"  
   
   echo ""  
   if ! [ -f "$MARK" ]; then             
     URL="http://${HOST}:8000"
 
-    echo -e "${LCYAN}Setting up Google Authentication:${NC}"
-    echo ""
+    INSTRUCTIONS="${LCYAN}Setting up Google Authentication:${NC}\n\n
+    
+        1. Visit the Google Developers Console at ${CYAN}https://console.developers.google.com/projectcreate${NC} and log in with your Google account.\n
+            1.1. Project name: ${CYAN}${BBDD}${NC}\n
+            1.2. Leave the other fields with its default values.\n
+            1.3. Press the ${CYAN}create${NC} button.\n\n
 
-    echo -e "    1. Visit the Google Developers Console at ${CYAN}https://console.developers.google.com/projectcreate${NC} and log in with your Google account."
-    echo -e "        1.1. Project name: ${CYAN}${BBDD}${NC}"
-    echo -e "        1.2. Leave the other fields with its default values."
-    echo -e "        1.3. Press the ${CYAN}create${NC} button."
+        2. At the left panel, go to: ${CYAN}API and services -> OAuth consent screen${NC}\n
+            2.1. User type: ${CYAN}external${NC}\n
+            2.2. Press the ${CYAN}create${NC} button.\n\n
+
+        3. Add the following app information:\n
+            3.1. App name: ${CYAN}${BBDD}${NC}\n
+            3.2. Support email: ${CYAN}${EMAIL}${NC}\n
+            3.3. Developer contact information: ${CYAN}${EMAIL}${NC}\n
+            3.4. Leave the other fields with its default values.\n
+            3.5. Press the ${CYAN}save and continue${NC} button.\n
+            3.6. Press the ${CYAN}save and continue${NC} button.\n
+            3.7. Press the ${CYAN}save and continue${NC} button.\n
+            3.8. Press the ${CYAN}return to panel${NC} button.\n\n
+
+        4. At the left panel, go to: ${CYAN}API and services -> Credentials${NC}\n
+            4.1. Press the ${CYAN}create credentials${NC} button.\n
+            4.2. Select the ${CYAN}OAuth client ID${NC} option.\n
+            4.3. Application type: ${CYAN}Web application${NC}\n
+            4.4. Name: ${CYAN}${BBDD}${NC}\n
+            4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${HOST}:8000${NC}\n
+            4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${HOST}:8000/google/login/callback/${NC}\n
+            4.7. Press the ${CYAN}create${NC} button.\n
+            4.8. Copy your ${CYAN}client id${NC} and ${CYAN}secret key${NC}, it will be required later.\n\n        
+    "
+
+    echo -e $INSTRUCTIONS > resources/how-to-google-developers-console.txt             
+    echo -e $INSTRUCTIONS
+
     echo ""
-    echo -e "    2. At the left panel, go to: ${CYAN}API and services -> OAuth consent screen${NC}"
-    echo -e "        2.1. User type: ${CYAN}external${NC}"
-    echo -e "        2.2. Press the ${CYAN}create${NC} button."
-    echo ""
-    echo -e "    3. Add the following app information:"
-    echo -e "        3.1. App name: ${CYAN}${BBDD}${NC}"
-    echo -e "        3.2. Support email: ${CYAN}${EMAIL}${NC}"
-    echo -e "        3.3. Developer contact information: ${CYAN}${EMAIL}${NC}"
-    echo -e "        3.4. Leave the other fields with its default values."
-    echo -e "        3.5. Press the ${CYAN}save and continue${NC} button."
-    echo -e "        3.6. Press the ${CYAN}save and continue${NC} button."
-    echo -e "        3.7. Press the ${CYAN}save and continue${NC} button."
-    echo -e "        3.8. Press the ${CYAN}return to panel${NC} button."    
-    echo ""
-    echo -e "    4. At the left panel, go to: ${CYAN}API and services -> Credentials${NC}"
-    echo -e "        4.1. Press the ${CYAN}create credentials${NC} button."
-    echo -e "        4.2. Select the ${CYAN}OAuth client ID${NC} option."
-    echo -e "        4.3. Application type: ${CYAN}Web application${NC}"
-    echo -e "        4.4. Name: ${CYAN}${BBDD}${NC}"    
-    echo -e "        4.5. Authorized JavaScript origins → Add URI: ${CYAN}http://${HOST}:8000${NC}"                   
-    echo -e "        4.6. Authorized redirect URIs → Add URI: ${CYAN}http://${HOST}:8000/google/login/callback/${NC}"        
-    
-    echo -e "        4.7. Press the ${CYAN}create${NC} button."
-    echo -e "        4.8. Copy your ${CYAN}client id${NC} and ${CYAN}secret key${NC}, it will be required later."             
-    
-    echo ""
+    echo -e "The previous instructions will be stored in a file called 'resources/how-to-google-developers-console.txt'"
     echo -e "${ORANGE}Once completed the previous configuration, press any key to continue...${NC}"
     read 
     
