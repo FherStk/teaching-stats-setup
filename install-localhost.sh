@@ -767,6 +767,7 @@ setup_host
 setup_files
 setup_django
 setup_gauth
+setup_site
 
 populate master teaching-stats-db-population insert_data.py
 populate students teaching-stats-import-students insert_students.py
