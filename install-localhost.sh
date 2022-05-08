@@ -426,7 +426,7 @@ setup_site()
   if ! [ -f "$MARK" ]; then    
     echo -e "${LCYAN}Setting up the site Django data within ${CYAN}${FILE}${LCYAN}:${NC}"
     echo "Setting up the site secret key..." 
-    SECRET=$(python3 -c 'from Django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
+    SECRET=$(python -c 'from Django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
     sed -i "s/'YOUR-SECRET-KEY'/'${SECRET}'/g" ${FILE}          
 
     ID=$(runuser -l postgres -c "psql -d \"${BBDD}\" -qtAX -c 'SELECT * FROM django_site WHERE name='\'${HOST}:8000\'';'")    
@@ -767,7 +767,6 @@ setup_host
 setup_files
 setup_django
 setup_gauth
-setup_site
 
 populate master teaching-stats-db-population insert_data.py
 populate students teaching-stats-import-students insert_students.py
